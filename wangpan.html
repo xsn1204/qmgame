@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网盘</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --baiduyun-blue: #3A8DFF;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        .baiduyun-app {
+            width: 900px;
+            height: 600px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .app-header {
+            height: 45px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } 
+        .yellow { background: #FFBD2E; } 
+        .green { background: #27C93F; }
+        .app-title { font-size: 14px; font-weight: 500; color: #333; margin-left: 10px; flex-grow: 1; text-align: center; }
+
+        .baiduyun-content { flex: 1; display: flex; }
+
+        .sidebar {
+            width: 150px;
+            background: var(--mac-bg);
+            border-right: 1px solid #ddd;
+            padding: 15px 0;
+            flex-shrink: 0;
+        }
+        .nav-item {
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex; align-items: center;
+        }
+        .nav-item:hover { background: #e0e0e0; }
+        .nav-item.active { background: var(--baiduyun-blue); color: white; }
+        .nav-item span { margin-right: 10px; font-size: 16px; }
+
+        .file-list-area { flex: 1; display: flex; flex-direction: column; }
+        .file-toolbar {
+            height: 50px;
+            border-bottom: 1px solid #eee;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .toolbar-button {
+            background: var(--baiduyun-blue);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex; align-items: center;
+        }
+        .file-table { flex: 1; overflow-y: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td {
+            text-align: left;
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: 500;
+            color: #777;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover { background: #f9f9f9; }
+        .file-name-cell { display: flex; align-items: center; }
+        .file-icon { margin-right: 10px; font-size: 20px; }
+        .encrypted-file { color: #e74c3c; font-weight: 600; cursor: pointer; }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1010;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 350px;
+            text-align: center;
+        }
+        .modal-content h3 { margin-bottom: 20px; color: #333; }
+        .modal-content input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .modal-content button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        #open-button {
+            background: var(--baiduyun-blue);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>百度网盘</span>
+            <span>文件</span>
+            <span>传输</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+
+    <div class="baiduyun-app">
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="app-title">百度网盘 - 我的文件</div>
+        </div>
+
+        <div class="baiduyun-content">
+            <div class="sidebar">
+                <div class="nav-item active"><span>🗄️</span> 我的网盘</div>
+                <div class="nav-item"><span>📤</span> 传输列表</div>
+                <div class="nav-item"><span>🗑️</span> 回收站</div>
+                <div class="nav-item"><span>👥</span> 分享</div>
+            </div>
+
+            <div class="file-list-area">
+                <div class="file-toolbar">
+                    <div class="toolbar-button">➕ 上传文件</div>
+                    <div class="toolbar-button">📁 新建文件夹</div>
+                </div>
+                <div class="file-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">文件名</th>
+                                <th style="width: 20%;">大小</th>
+                                <th style="width: 30%;">修改日期</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                             <tr>
+                                <td>
+                                    <div class="file-name-cell">
+                                        <span class="file-icon" style="color:#e74c3c;">🔐</span>
+                                        <span class="file-name encrypted-file" onclick="showPasswordPrompt()">A2U836_行车记录20241020.mp3</span>
+                                    </div>
+                                </td>
+                                <td>3.5 MB</td>
+                                <td style="color:#e74c3c; font-weight:600;">2025/11/30</td>
+                            </tr>
+                            <tr onclick="window.location.href='card.html'" style="cursor: pointer;">
+                                <td>
+                                    <div class="file-name-cell">
+                                        <span class="file-icon">🖼️</span>
+                                        <span class="file-name">未命名12.jpg</span>
+                                    </div>
+                                </td>
+                                <td>0.4 MB</td>
+                                <td>2025/11/30</td>
+                            </tr>
+                            <tr>
+                                <td><div class="file-name-cell"><span class="file-icon">📁</span><span class="file-name">产品规范文档 (V4.0)</span></div></td>
+                                <td>-</td>
+                                <td>2025/11/03</td>
+                            </tr>
+                            <tr>
+                                <td><div class="file-name-cell"><span class="file-icon">📊</span><span class="file-name">季度数据分析报告.xlsx</span></div></td>
+                                <td>1.2 MB</td>
+                                <td>2025/09/29</td>
+                            </tr>
+                            <tr>
+                                <td><div class="file-name-cell"><span class="file-icon">📁</span><span class="file-name">毕业照片备份</span></div></td>
+                                <td>-</td>
+                                <td>2025/08/15</td>
+                            </tr>
+                            <tr>
+                                <td><div class="file-name-cell"><span class="file-icon">📄</span><span class="file-name">求职简历_新.docx</span></div></td>
+                                <td>32 KB</td>
+                                <td>2025/05/04</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>请输入密码</h3>
+            <input type="password" id="file-password" onkeydown="handleKey(event)">
+            <button onclick="closePasswordPrompt()">取消</button>
+            <button id="open-button" onclick="checkPassword()">打开文件</button>
+        </div>
+    </div>
+
+    <script>
+        const correctPassword = "7gvy";
+
+        function showPasswordPrompt() {
+            document.getElementById('password-modal').style.display = 'flex';
+            document.getElementById('file-password').value = '';
+            document.getElementById('file-password').focus();
+        }
+
+        function closePasswordPrompt() {
+            document.getElementById('password-modal').style.display = 'none';
+        }
+
+        function handleKey(event) {
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        }
+
+        function checkPassword() {
+            const enteredPassword = document.getElementById('file-password').value;
+
+            if (enteredPassword === correctPassword) {
+                // ✅ 跳转到录音页面
+                window.location.href = "recording.html";
+            } else {
+                alert("密码错误，请重试！");
+                document.getElementById('file-password').value = '';
+                document.getElementById('file-password').focus();
+            }
+        }
+    </script>
+
+</body>
+</html>

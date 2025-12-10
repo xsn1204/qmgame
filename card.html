@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>油卡充值发票</title>
+    <style>
+        body {
+            font-family: 'SimHei', Arial, sans-serif;
+            margin: 20px;
+            background-color: #eee;
+        }
+        .invoice-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #fff;
+            border: 1px solid #000;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            border-bottom: 3px double #000;
+            padding-bottom: 5px;
+        }
+        .info-box {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            margin-bottom: 20px;
+        }
+        .detail-table th, .detail-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .detail-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .summary {
+            text-align: right;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .footer {
+            border-top: 1px dashed #999;
+            padding-top: 15px;
+            font-size: 12px;
+            color: #666;
+        }
+        .card-masked {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="invoice-container">
+    <div class="header">
+        <h1>中石油油卡电子充值凭证</h1>
+        <p>（非正式税务发票，仅供充值参考）</p>
+    </div>
+
+    <div class="info-box">
+        <div>
+            <p><strong>开票日期:</strong> 2024年11月15日</p>
+            <p><strong>发票编号:</strong> 202411150012</p>
+        </div>
+        <div>
+            <p><strong>客户名称:</strong>  </p>
+            <p><strong>油卡主卡号:</strong> 1030 XXXXXX 1544</p>
+        </div>
+    </div>
+
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>序号</th>
+                <th>交易时间</th>
+                <th>充值项目</th>
+                <th>充值金额 (元)</th>
+                <th>支付方式</th>
+                <th>银行卡/账号</th>
+                <th>交易状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>2024-09-05 14:30:15</td>
+                <td>油卡充值</td>
+                <td>500.00</td>
+                <td>银行卡</td>
+                <td class="card-masked">************3671</td>
+                <td>成功</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>2024-10-28 09:10:45</td>
+                <td>油卡充值</td>
+                <td>300.00</td>
+                <td>支付宝</td>
+                <td>支付宝账号 (*******4968)</td>
+                <td>成功</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>2024-11-15 17:05:22</td>
+                <td>油卡充值</td>
+                <td>1000.00</td>
+                <td>银行卡</td>
+                <td class="card-masked">************3671</td>
+                <td>成功</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="summary">
+        <p><strong>总充值金额 (大写): </strong> 壹仟捌佰元整</p>
+        <p><strong>总充值金额 (小写): </strong> ¥ 1800.00</p>
+    </div>
+
+    <div class="footer">
+        <p>备注：充值资金已实时到账至对应油卡账户。如有疑问，请联系客服中心。</p>
+    </div>
+</div>
+
+</body>
+</html>

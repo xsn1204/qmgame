@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseFlow</title>
+    <style>
+        :root {
+            --oa-blue: #3498db;
+            --oa-background: #ecf0f1;
+            --oa-text: #34495e;
+            --shadow-card: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            background: var(--oa-background);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            width: 380px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: var(--oa-blue);
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--oa-text);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--oa-blue);
+            outline: none;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background: var(--oa-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            background: #2980b9;
+        }
+
+        .error-message {
+            color: var(--oa-red);
+            margin-top: 15px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>OA后台登录</h2>
+
+        <div class="input-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" placeholder="邮箱地址" onkeydown="handleKey(event)">
+        </div>
+
+        <div class="input-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" placeholder="请输入密码" onkeydown="handleKey(event)">
+        </div>
+
+        <button class="login-button" onclick="checkLogin()">登 录</button>
+
+        <div id="error-msg" class="error-message"></div>
+    </div>
+
+    <script>
+        // 📧 登录邮箱地址（隐藏，仅在逻辑中使用）
+        const correctUsername = "feng.jy@qysk.com";
+        // 🔑 设定的正确密码
+        const correctPassword = "20201117"; 
+        
+        // 🎯 跳转目标页面的名称
+        const targetPage = "expenseflow.html"; 
+
+        function handleKey(event) {
+            if (event.key === 'Enter') {
+                checkLogin();
+            }
+        }
+
+        function checkLogin() {
+            const enteredPassword = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
+            
+            errorMsg.textContent = ''; // 清除之前的错误信息
+
+            if (enteredPassword === correctPassword) {
+                // 密码正确，执行跳转
+                errorMsg.textContent = '登录成功，正在跳转...';
+                errorMsg.style.color = 'green';
+                
+                // 仅用于演示：显示邮箱（实际应用中不会这样做）
+                console.log("Logged in as:", correctUsername); 
+
+                window.location.href = targetPage; 
+            } else {
+                // 密码错误
+                errorMsg.textContent = '密码错误，请重试！';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        }
+    </script>
+</body>
+</html>

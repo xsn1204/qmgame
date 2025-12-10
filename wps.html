@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPS</title>
+    <style>
+        :root {
+            --wps-color: #E63946;
+            --dingtalk-color: #1e88e5;
+            /* 新增：微信的绿色 */
+            --wechat-color: #07C160; 
+            --secret-color: #a040a0;
+            --desktop-icon-label-color: #333;
+            --shadow-window: 0 20px 60px rgba(0,0,0,0.3); /* 窗口阴影变量 */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            /* 沿用上次的 macOS 风格背景 */
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        /* --- macOS Dock (WPS Icon Active) --- */
+        .mac-dock {
+            position: absolute; bottom: 20px; height: 64px;
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 18px;
+            display: flex; align-items: center; padding: 0 12px; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+         /* Dock 链接样式：重要！覆盖 a 标签的默认下划线 */
+        .dock-link {
+            text-decoration: none;
+            color: inherit; /* 继承父元素的颜色 */
+
+            
+        }
+        .dock-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 26px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dock-icon:hover { transform: translateY(-15px) scale(1.1); margin: 0 5px; }
+        .dock-icon.active { position: relative; }
+        .dock-icon.active::after { content: ''; position: absolute; bottom: -8px; width: 4px; height: 4px; background: #333; border-radius: 50%; }
+/* --- 桌面图标 --- */
+        /* 移除桌面图标链接的下划线 */
+        .desktop-icon-link {
+            text-decoration: none; 
+        }
+        
+        .desktop-icons-container {
+            position: absolute;
+            top: 40px; 
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .desktop-icon {
+            width: 80px; height: 90px;
+            display: flex; flex-direction: column; align-items: center;
+            margin: 15px 0;
+            cursor: pointer;
+            text-align: center;
+        }
+        .icon-image {
+            width: 64px; height: 64px; border-radius: 15px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 30px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            transition: box-shadow 0.2s;
+            font-weight: 700;
+        }
+        .icon-image:hover { box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3); } 
+
+        .icon-label {
+            margin-top: 5px; font-size: 12px; 
+            color: var(--desktop-icon-label-color); 
+            background: rgba(255,255,255,0.6); 
+            padding: 2px 6px; border-radius: 4px;
+            font-weight: 500;
+            text-shadow: none; 
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .icon-folder {
+            background: linear-gradient(to top, #7d7d7d, #a0a0a0);
+            font-size: 35px;
+            padding-top: 5px;
+        }
+        .secret-label {
+            color: #cc0000; 
+            font-weight: 700;
+            background: rgba(255,255,255,0.8);
+        }
+
+
+
+        /* --- WPS Window --- */
+        .window {
+            width: 1000px;
+            height: 680px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            animation: popIn 0.4s ease-out;
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* Window Controls */
+        .window-controls { padding: 16px; display: flex; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+
+        /* WPS Navigation Sidebar */
+        .wps-nav {
+            width: 220px;
+            background: #fcfcfc;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        .wps-nav-group { padding-top: 20px; }
+        .nav-title { padding: 5px 15px; margin-top: 10px; font-size: 11px; color: #999; font-weight: 500; }
+        .nav-item {
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #444;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.1s;
+        }
+        .nav-item:hover { background: #f0f0f0; }
+        .nav-item.active {
+            background: #e0f0ff;
+            color: var(--wps-blue);
+            font-weight: 600;
+            border-right: 3px solid var(--wps-blue);
+            margin-right: -3px; /* Pull into border to show full width */
+        }
+        .nav-item span { margin-right: 10px; font-size: 16px; }
+
+        /* Main Content Area */
+        .wps-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+        .content-header {
+            padding: 20px 30px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* File List Table */
+        .file-link {
+            color: inherit; /* 继承父元素文本颜色 (通常是深灰色或黑色) */
+            text-decoration: none; /* 移除下划线 */
+            cursor: pointer; /* 确保鼠标指针是手型，提示可点击 */
+        }
+        .file-link:hover {
+            text-decoration: underline; /* 可以在悬停时重新显示下划线以提供反馈 */
+        }
+
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 30px;
+        }
+        .file-list table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .file-list th {
+            text-align: left;
+            padding: 15px 0;
+            color: #999;
+            font-weight: 500;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .file-list td {
+            padding: 15px 0;
+            color: #333;
+            border-bottom: 1px solid #f8f8f8;
+        }
+        .file-list tr:hover { background: #fafafa; }
+        
+        /* File Name Column Styling */
+        .file-name-cell {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        /* Generic Document Icon Styling */
+        .doc-icon {
+            width: 32px;
+            height: 38px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 10px;
+            flex-shrink: 0;
+            margin-right: 15px;
+            padding-top: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .doc-icon span { font-size: 9px; margin-top: -2px; }
+
+        /* Document Type Colors */
+        .doc-type-docx { background: #e6f7ff; color: var(--color-docx); border: 1px solid #91d5ff; }
+        .doc-type-pdf { background: #fff1f0; color: var(--color-pdf); border: 1px solid #ff7a45; }
+        .doc-type-xlsx { background: #f6ffed; color: var(--color-xlsx); border: 1px solid #b7eb8f; }
+        .doc-type-pptx { background: #fff0f6; color: var(--color-pptx); border: 1px solid #ffadd2; }
+
+    </style>
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>WPS</span>
+            <span>文件</span>
+            <span>编辑</span>
+            <span>工具</span>
+            <span>帮助</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+
+    <div class="desktop-icons-container">
+    
+        <a href="wps.html" target="_blank" class="desktop-icon-link">
+            <div class="desktop-icon">
+                <div class="icon-image" style="background:var(--wps-color); color:white; font-size:35px;">W</div>
+                <div class="icon-label">WPS Office</div>
+            </div>
+        </a>
+
+        <a href="dingtalk.html" target="_blank" class="desktop-icon-link">
+            <div class="desktop-icon">
+                <div class="icon-image" style="background:var(--dingtalk-color); color:white; font-size:35px;">钉</div>
+                <div class="icon-label">钉钉</div>
+            </div>
+        </a>
+        
+        <a href="wechat.html" target="_blank" class="desktop-icon-link">
+            <div class="desktop-icon">
+                <div class="icon-image" style="background:var(--wechat-color); color:white; font-size:35px;">微</div>
+                <div class="icon-label">微信</div>
+            </div>
+        </a>
+        
+        <div class="desktop-icon">
+            <div class="icon-image" style="background:#fff; color:#1e88e5;">🧭</div>
+            <div class="icon-label">Safari</div>
+        </div>
+        
+        </div>
+    </div>
+
+
+
+    <div class="window">
+        <div class="wps-nav">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            
+            <div class="wps-nav-group">
+                <div class="nav-item active">
+                    <span>⏱️</span> 最近浏览
+                </div>
+                <div class="nav-item">
+                    <span>☁️</span> WPS 云文档
+                </div>
+                <div class="nav-item">
+                    <span>📁</span> 本地文档
+                </div>
+            </div>
+
+            <div class="wps-nav-group">
+                <div class="nav-title">文档中心</div>
+                <div class="nav-item">
+                    <span>📝</span> 文档转换
+                </div>
+                <div class="nav-item">
+                    <span>🖼️</span> 图片处理
+                </div>
+                <div class="nav-item">
+                    <span>👤</span> 个人模板
+                </div>
+            </div>
+        </div>
+
+        <div class="wps-content">
+            <div class="content-header">
+                最近浏览
+            </div>
+            
+            <div class="file-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">文件名 🔽</th>
+                            <th style="width: 20%;">类型</th>
+                            <th style="width: 15%;">大小</th>
+                            <th style="width: 15%;">修改时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="file-name-cell">
+                                <div class="doc-icon doc-type-docx">
+                                    DOC<span>X</span>
+                                </div>
+                                产品需求文档（PRD）- V4.0
+                            </td>
+                            <td>Word 文档</td>
+                            <td>450 KB</td>
+                            <td>上月 23日</td>
+                        </tr>
+                        <tr>
+                            <td class="file-name-cell">
+                                <div class="doc-icon doc-type-pdf">
+                                    PDF
+                                </div>
+                                用户画像及竞品分析报告
+                            </td>
+                            <td>PDF</td>
+                            <td>2.1 MB</td>
+                            <td>上月 23日</td>
+                        </tr>
+                        <tr>
+                            <td class="file-name-cell">
+                                <div class="doc-icon doc-type-xlsx">
+                                    XLS<span>X</span>
+                                </div>
+                                2026一季度OKR规划及资源分配
+                            </td>
+                            <td>Excel 表格</td>
+                            <td>88 KB</td>
+                            <td>上月 21日</td>
+                        </tr>
+<tr>
+                            <td class="file-name-cell">
+                                <div class="doc-icon doc-type-docx">
+                                    DOC<span>X</span>
+                                </div>
+                                <a href="oa.html" target="_blank" class="file-link">
+                                    OA费用报销单
+                                </a>
+                            </td>
+                            <td>Word 文档</td>
+                            <td>132 KB</td>
+                            <td>上月 20日</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="file-name-cell">
+                                <div class="doc-icon doc-type-docx">
+                                    DOC<span>X</span>
+                                </div>
+                                <a href="zhuanzheng.html" target="_blank" class="file-link">
+                                    转正申请表_重要
+                                </a>
+                            </td>
+                            <td>Word 文档</td>
+                            <td>55 KB</td>
+                            <td>上月 20日</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="file-name-cell">
+                                <div class="doc-icon doc-type-pdf">
+                                    PDF
+                                </div>
+                                用户调研反馈汇总_Q1
+                            </td>
+                            <td>PDF</td>
+                            <td>1.1 MB</td>
+                            <td>上月 16日</td>
+                        </tr>
+                        <tr>
+                            <td class="file-name-cell">
+                                <div class="doc-icon doc-type-xlsx">
+                                    XLS<span>X</span>
+                                </div>
+                                A/B测试数据结果分析
+                            </td>
+                            <td>Excel 表格</td>
+                            <td>150 KB</td>
+                            <td>上月 15日</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mac-dock">
+        <a href="note.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📝</div> 
+        </a>
+        <a href="mailbox.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📧</div>
+        </a>
+        <a href="calendar.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📅</div>
+        </a>
+        <a href="message.html" target="_blank" class="dock-link">
+            <div class="dock-icon">💬</div>
+        </a>
+        <a href="setting.html" target="_blank" class="dock-link">
+            <div class="dock-icon">⚙️</div>
+        </a>
+    </div>
+
+</body>
+</html>

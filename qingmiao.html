@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青苗计划-官方网站</title>
+    <style>
+        :root {
+            --primary-green: #38a169; /* 公益绿色 */
+            --light-green: #e6fffa;
+            --text-color: #333;
+            --nav-link-color: #555;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            /* 移除 OS 背景，使用纯白或普通网页背景 */
+            background: #f7f7f7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 网站核心容器，模拟网页内容居中 */
+        .website-container {
+            width: 100%;
+            max-width: 1200px; /* 扩展最大宽度，更像现代网站 */
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex-grow: 1;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+        .nav-links a {
+            margin-left: 35px;
+            text-decoration: none;
+            color: var(--nav-link-color);
+            font-weight: 500;
+            transition: color 0.2s, border-bottom 0.2s;
+            cursor: pointer;
+        }
+        .nav-links a:hover { color: var(--primary-green); }
+        .nav-links a.active { color: var(--primary-green); border-bottom: 3px solid var(--primary-green); padding-bottom: 5px; }
+
+        /* 内容区容器 */
+        .content-section {
+            padding: 40px 50px;
+            display: none; /* 默认隐藏所有内容区 */
+            min-height: 500px;
+        }
+        .content-section.active {
+            display: block; /* 仅显示活动内容区 */
+        }
+        
+        /* 通用样式 */
+        .page-title {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        /* --- 首页样式 --- */
+        .hero {
+            background-color: var(--light-green);
+            padding: 60px 50px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 38px;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+        }
+        .hero p {
+            font-size: 18px;
+            color: #555;
+            max-width: 900px;
+            margin: 0 auto 30px;
+        }
+        .cta-button {
+            padding: 12px 30px;
+            background-color: var(--primary-green);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 160, 0, 0.2);
+            display: inline-block;
+        }
+        .cta-button:hover { background-color: #2c8e59; }
+
+        .features {
+            display: flex;
+            justify-content: space-around;
+            padding: 50px 50px;
+            text-align: center;
+        }
+        .feature-card {
+            width: 30%;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background: #fff;
+        }
+        .feature-card h3 { color: var(--primary-green); margin-top: 10px; font-size: 20px; }
+        .feature-card p { font-size: 14px; color: #777; margin-top: 10px; }
+        .feature-icon { font-size: 40px; color: var(--primary-green); }
+
+        .transparency {
+            background: #f8f8f8;
+            padding: 40px 50px;
+            text-align: center;
+            border-top: 2px dashed #ddd;
+        }
+        .transparency h2 { color: #333; margin-bottom: 15px; font-size: 24px; }
+        .transparency p { font-size: 16px; color: #666; max-width: 900px; margin: 0 auto; }
+        .transparency strong { color: #cc0000; }
+        
+        /* --- 其他页面内容样式（用于交互）--- */
+        .content-list li {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .content-list h4 { color: #2c3e50; font-size: 18px; }
+        .content-list span { font-size: 14px; color: #777; }
+        .content-list .status-active { color: var(--primary-green); font-weight: 600; }
+        .content-list .status-closed { color: #e74c3c; }
+
+
+        /* Footer */
+        .footer {
+            background: #333;
+            color: #ccc;
+            padding: 20px 50px;
+            font-size: 12px;
+            text-align: center;
+            margin-top: auto; /* 确保 Footer 始终在底部 */
+        }
+        .footer a { color: #888; text-decoration: none; margin: 0 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="website-container">
+        
+        <div class="nav-bar">
+            <a href="#" class="logo">🌳 青苗计划</a>
+            <div class="nav-links">
+                <a href="#home" data-page="home" class="active">项目首页</a>
+                <a href="#internships" data-page="internships">实习岗位</a>
+                <a href="#volunteering" data-page="volunteering">志愿活动</a>
+                <a href="#subsidy" data-page="subsidy">补贴申请</a>
+                <a href="#about" data-page="about">关于我们</a>
+            </div>
+        </div>
+
+        <div id="website-main-content">
+
+            <div id="home" class="content-section active">
+                <div class="hero">
+                    <h1>点亮未来，成就梦想 — 青年成长公益支持计划</h1>
+                    <p>青苗计划致力于为在校大学生提供透明、安全、优质的实习、志愿服务机会，并提供奖学金和助学金，助力青年学子踏出社会第一步。</p>
+                    <a href="#" class="cta-button">立即加入计划</a>
+                </div>
+    
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">💼</div>
+                        <h3>实习机会匹配</h3>
+                        <p>与数百家信誉良好的企业合作，提供符合专业发展的实习岗位。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤝</div>
+                        <h3>社区志愿服务</h3>
+                        <p>组织和参与各类社会公益项目，积累社会经验，提升社会责任感。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>奖金与补贴</h3>
+                        <p>为参与项目的学生提供奖学金和助学金，减轻经济压力，专注于成长。</p>
+                    </div>
+                </div>
+    
+                <div class="transparency">
+                    <h2>项目透明度声明</h2>
+                    <p>青苗计划的所有运营信息、资金流向、补贴标准及合作企业名单均向公众公开。欢迎社会各界监督。</p>
+                </div>
+            </div>
+
+            <div id="internships" class="content-section">
+                <h2 class="page-title">合作企业直招</h2>
+                <ul class="content-list">
+                    <li>
+                        <div>
+                            <h4>产品助理</h4>
+                            <span>臻鼎集团 | 青州 | 待遇：￥5000/月 + 青苗补贴</span>
+                        </div>
+                        <span class="status-active">热招中</span>
+                    </li>
+                    <li>
+                        <div>
+                            <h4>前端开发工程师</h4>
+                            <span>慧川新星 | 远程/上海 | 待遇：￥4000/月</span>
+                        </div>
+                        <span class="status-active">热招中</span>
+                    </li>
+                    <li>
+                        <div>
+                            <h4>财务实习生</h4>
+                            <span>兴业会计师事务所 | 北京 | 待遇：￥3500/月</span>
+                        </div>
+                        <span class="status-closed">已满员</span>
+                    </li>
+                    <li>
+                        <div>
+                            <h4>数据分析实习生</h4>
+                            <span>极数智能 | 北京 | 待遇：￥5000/月</span>
+                        </div>
+                        <span class="status-active">热招中</span>
+                    </li>
+
+                    <li>
+                        <div>
+                            <h4>AI训练师实习生</h4>
+                            <span>智创未来 | 远程 | 待遇：￥6000/月</span>
+                        </div>
+                        <span class="status-active">热招中</span>
+                    </li>
+
+                    <li>
+                        <div>
+                            <h4>后端开发实习生</h4>
+                            <span>云栖互联 | 杭州 | 待遇：￥4500/月</span>
+                        </div>
+                        <span class="status-active">热招中</span>
+                    </li>
+
+                    <li>
+                        <div>
+                            <h4>人力资源助理</h4>
+                            <span>新锐咨询 | 广州 | 待遇：￥4000/月</span>
+                        </div>
+                        <span class="status-closed">已满员</span>
+                    </li>
+
+                    <li>
+                        <div>
+                            <h4>市场策划实习生</h4>
+                            <span>星河传媒 | 深圳 | 待遇：￥5000/月 + 提成</span>
+                        </div>
+                        <span class="status-active">热招中</span>
+                    </li>
+
+                    </ul>
+                <p style="margin-top: 30px; color:#999; text-align: center;">所有岗位均经过青苗计划严格筛选，确保真实性和安全性。</p>
+            </div>
+
+            <div id="volunteering" class="content-section">
+                <h2 class="page-title">践行社会责任</h2>
+                <ul class="content-list">
+                    <li>
+                        <div>
+                            <h4>助老社区服务</h4>
+                            <span>时间：每周六 | 地点：青州市城市微循环试点社区 | 招募：15人</span>
+                        </div>
+                        <span class="status-active">报名中</span>
+                    </li>
+                    <li>
+                        <div>
+                            <h4>山区儿童教育帮扶</h4>
+                            <span>时间：寒暑假 | 地点：青州市临云山区 | 招募：10人</span>
+                        </div>
+                        <span class="status-active">报名中</span>
+                    </li>
+                    <li>
+                        <div>
+                            <h4>环保宣传大使</h4>
+                            <span>时间：不定期 | 地点：线上/本地公园 | 招募：不限</span>
+                        </div>
+                        <span class="status-active">报名中</span>
+                    </li>
+
+
+                    <li>
+                        <div>
+                            <h4>应急救援志愿培训</h4>
+                            <span>时间：周末 | 地点：青州市应急教育基地 | 招募：25人</span>
+                        </div>
+                        <span class="status-active">报名中</span>
+                    </li>
+
+                    <li>
+                        <div>
+                            <h4>流浪动物关爱志愿行动</h4>
+                            <span>时间：每月两次 | 地点：青州市流浪动物基地 | 招募：10人</span>
+                        </div>
+                        <span class="status-active">报名中</span>
+                    </li>
+
+                    <li>
+                        <div>
+                            <h4>红色文化讲解志愿者</h4>
+                            <span>时间：周末及节假日 | 地点：青州市红色教育基地 | 招募：6人</span>
+                        </div>
+                        <span class="status-active">报名中</span>
+                    </li>
+
+                    <li>
+                        <div>
+                            <h4>公益讲座组织协助</h4>
+                            <span>时间：不定期 | 地点：社区文化活动中心 | 招募：15人</span>
+                        </div>
+                        <span class="status-active">报名中</span>
+                    </li>
+                </ul>
+            </div>
+
+<div id="subsidy" class="content-section">
+    <h2 class="page-title">奖助申请</h2>
+
+    <div style="background-color: #fcebeb; padding: 20px; border-left: 5px solid #e74c3c; margin-bottom: 20px;">
+        <h3 style="color: #c0392b;">重要通知：</h3>
+        <p style="color: #c0392b; font-weight: 500;">近期，系统正在进行安全升级。奖金发放可能略有延迟，请耐心等待。</p>
+    </div>
+    
+    <h3 style="margin-top: 30px; color:#444;">🏆 奖学金类型：</h3>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 15px;">
+        <thead>
+            <tr style="background-color: #444; color: white; text-align: left;">
+                <th style="padding: 12px; border: 1px solid #ddd;text-align:center;">奖学金类型</th>
+                <th style="padding: 12px; border: 1px solid #ddd;text-align:center;">核心评选标准</th>
+                <th style="padding: 12px; border: 1px solid #ddd;text-align:center;">奖金范围 (RMB)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background-color: #f9f9f9;">
+                <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;color: #38a169;text-align:center; ">卓越之星</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">针对在实习或志愿项目中表现优异、有显著个人提升和实践贡献的学生。</td>
+                <td style="padding: 12px; border: 1px solid #ddd; ">¥ 3,000 - 5,000</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #38a169;text-align:center;">创行先锋</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">鼓励在科研、创业或技术开发项目中取得突出成果，体现创新精神和技术应用能力的学生。</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">¥ 5,000 - 8,000</td>
+            </tr>
+            <tr style="background-color: #f9f9f9;">
+                <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;color: #38a169;text-align:center; ">引航领袖</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">评选在学生组织、团队项目或创业实践中展现卓越领导力、组织能力及长远潜力的学生。</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">¥ 8,000 - 10,000</td>
+            </tr>
+        </tbody>
+    </table>
+    
+<a href="qmjhsystem.html" 
+   target="_blank"
+   class="cta-button" 
+   style="margin-top: 30px; display: inline-block; padding: 10px 20px; background-color: #2c8e59; color: white; text-decoration: none; border-radius: 5px;">
+    进入申领系统 >>
+</a>
+</div>
+
+            <div id="about" class="content-section">
+                <h2 class="page-title">公益理念与合作伙伴</h2>
+                <p>青苗计划成立于2013年，是臻鼎集团发起和监管的非营利性公益项目。</p>
+                <h3 style="margin-top: 20px; color: var(--primary-green);">核心理念：</h3>
+                <p>🌱 透明、信任、成长：我们相信，给与青年最大的支持，就是提供一个公开透明且公平竞争的平台。</p>
+                
+                <h3 style="margin-top: 20px; color: var(--primary-green);">合作伙伴：</h3>
+                <p>臻鼎集团、青州大学、青源数科等。</p>
+                
+                <h3 style="margin-top: 20px; color: var(--primary-green);">项目年报：</h3>
+                <p>点击查看 <a href="auditreport.html" style="color:#3498db;">2024年青苗计划年度资金审计报告 (PDF)</a>。</p>
+            </div>
+            
+        </div>
+        
+        <div class="footer">
+            &copy; 青源数字科技有限公司 版权所有 青ICP备12842392号 经营许可证： 青B2-20140388 | <a href="#">法律声明</a> | <a href="#">隐私政策</a> | <a href="#">联系我们</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            const activatePage = (pageId) => {
+                // 移除所有链接的 active 状态
+                navLinks.forEach(link => link.classList.remove('active'));
+                // 隐藏所有内容区
+                contentSections.forEach(section => section.classList.remove('active'));
+
+                // 激活当前链接和内容区
+                const activeLink = document.querySelector(`[data-page="${pageId}"]`);
+                const activeSection = document.getElementById(pageId);
+                
+                if (activeLink) activeLink.classList.add('active');
+                if (activeSection) activeSection.classList.add('active');
+            };
+
+            // 监听导航链接点击事件
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.getAttribute('data-page');
+                    activatePage(pageId);
+                });
+            });
+
+            // 初始化：根据 URL hash 或默认显示 'home'
+            const initialPage = window.location.hash.substring(1) || 'home';
+            activatePage(initialPage);
+        });
+    </script>
+
+</body>
+</html>

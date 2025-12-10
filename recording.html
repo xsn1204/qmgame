@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>录音播放器</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --main-blue: #1e88e5;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+        }
+
+        /* 基础设置 */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 100vw;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        /* macOS Top Bar */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        /* 播放器窗口 */
+        .playback-app {
+            width: 1100px;
+            height: 680px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .app-header {
+            height: 45px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .app-title { font-size: 14px; font-weight: 500; color: #333; margin-left: 10px; flex-grow: 1; text-align: center; }
+
+        /* 内容区域 */
+        .playback-content {
+            flex: 1;               /* 占满剩余高度 */
+            display: flex;
+            min-height: 0;         /* flex 容器滚动需要 */
+        }
+
+        /* 左侧播放器 */
+        .player-interface {
+            width: 400px;
+            background: #fcfcfc;
+            border-right: 1px solid #eee;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .audio-icon { font-size: 80px; color: var(--main-blue); margin-bottom: 20px; }
+        .file-title { font-size: 20px; font-weight: 600; margin-bottom: 5px; text-align: center; }
+        .file-info { font-size: 13px; color: #777; margin-bottom: 40px; }
+
+        .timeline { width: 100%; height: 5px; background: #ddd; border-radius: 3px; margin-bottom: 10px; position: relative; }
+        .progress { width: 60%; height: 100%; background: var(--main-blue); border-radius: 3px; }
+        .time-labels { width: 100%; display: flex; justify-content: space-between; font-size: 12px; color: #777; margin-bottom: 30px; }
+        .controls { display: flex; align-items: center; gap: 30px; }
+        .control-button { font-size: 30px; color: #333; cursor: pointer; }
+        .play-button { font-size: 50px; color: var(--main-blue); }
+        .control-button:hover { opacity: 0.7; }
+
+        /* 右侧转录 */
+        .transcript-viewer {
+            flex: 1;               /* 填满右侧 */
+            overflow-y: auto;      /* 开启滚动 */
+            background: #fff;
+            padding: 30px 30px 50px 30px;
+            min-height: 0;         /* flex 滚动必要 */
+        }
+        .transcript-viewer h3 {
+            font-size: 16px;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 10;
+        }
+        .dialogue-line { display: flex; margin-bottom: 20px; line-height: 1.8; padding: 5px 0; border-left: 3px solid transparent; }
+        .dialogue-line.active { background: #e6f7ff; border-left: 3px solid var(--main-blue); padding-left: 10px; border-radius: 3px; }
+        .timestamp { width: 80px; flex-shrink: 0; font-weight: 600; color: #999; font-size: 13px; }
+        .speaker { font-weight: 700; margin-right: 10px; }
+        .speaker-A { color: #00bcd4; }
+        .speaker-B { color: #f44336; }
+        .text { flex: 1; font-size: 14px; }
+        .highlight { background: #ffecb3; padding: 1px 3px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>播放器</span>
+            <span>文件</span>
+            <span>编辑</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+
+    <div class="playback-app">
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="app-title">A2U836_行车记录20241020.mp3</div>
+        </div>
+
+        <div class="playback-content">
+            <!-- 左侧播放器 -->
+            <div class="player-interface">
+                <div class="audio-icon">🎶</div>
+                <div class="file-title">A2U836_行车记录20241020.mp3</div>
+                <div class="file-info">时长：04:20 | 格式：MP3</div>
+                <div class="timeline"><div class="progress"></div></div>
+                <div class="time-labels"><span>02:35</span><span>-01:45</span></div>
+                <div class="controls">
+                    <span class="control-button">⏮</span>
+                    <span class="control-button play-button">⏸</span>
+                    <span class="control-button">⏭</span>
+                    <span class="control-button" style="font-size: 20px;">🔊</span>
+                </div>
+            </div>
+
+            <!-- 右侧转录 -->
+            <div class="transcript-viewer">
+                <h3>🗣️ 自动转录 (AI识别结果)</h3>
+
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:00:45]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 其实啊……他最早啥都不是。外地来的，家里一般，普通大学生。他能爬上去，靠的不是他多聪明，是他老婆家。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:00:50]</div>
+                    <div class="text"><span class="speaker speaker-B">说话人2:</span> 哦？</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:00]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 陈家，知道吧？当年青州很硬的关系网。他第一块地、第一个项目，都是他老丈人帮他搭的桥。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:10]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 没那家子人，他顶多也就混个中型企业的项目经理。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:20]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 但你说人奇不奇怪？现在他看不上老婆了。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:30]</div>
+                    <div class="text"><span class="speaker speaker-B">说话人2:</span> 啊？</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:40]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 他们俩早就不一条心了。女的看不起他心黑，他嫌人家是累赘。可偏偏公司是两个人的，钱绑在一起，谁也甩不开谁。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:50]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 利益啊……这东西比感情结实多了。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:10]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 他现在最爱干啥你知道吗？给自己洗白。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:20]</div>
+                    <div class="text"><span class="speaker speaker-B">说话人2:</span> 洗白？</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:30]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 对啊，读什么MBA，上电视，上论坛，把自己包装成慈善家。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:01:40]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 但私底下啊，早玩的是地。城中村、拆迁，钱快，灰又肥。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:02:05]</div>
+                    <div class="text"><span class="speaker speaker-B">说话人2:</span> ……那这业务还挺复杂的。</div>
+                </div>
+                <div class="dialogue-line">
+                    <div class="timestamp">[00:02:15]</div>
+                    <div class="text"><span class="speaker speaker-A">说话人1:</span> 复杂？不复杂的话，养我们这种人干啥。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

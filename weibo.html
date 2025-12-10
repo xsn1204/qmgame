@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博</title>
+    <style>
+        /* 登录界面夜间模式基础样式 */
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #181818; /* 深色背景 */
+            color: #e0e0e0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* 登录卡片容器 */
+        .login-container {
+            width: 380px; 
+            padding: 40px 30px;
+            background-color: #1f1f1f; 
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); 
+            text-align: center;
+        }
+
+        /* 微博 Logo / 标题 */
+        .weibo-logo {
+            font-size: 36px;
+            font-weight: 700;
+            color: #ff8200; 
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        /* 输入框样式 */
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #333; 
+            border-radius: 6px;
+            background-color: #2c2c2c; 
+            color: #e0e0e0;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .input-field:focus {
+            border-color: #ff8200; 
+            outline: none;
+        }
+
+        /* 登录按钮 */
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff8200;
+            color: white;
+            border: none;
+            border-radius: 20px; 
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .login-btn:hover {
+            background-color: #e67500;
+        }
+
+        /* 辅助链接 */
+        .aux-links {
+            margin-top: 25px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .aux-links a {
+            color: #888; 
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .aux-links a:hover {
+            color: #ff8200;
+        }
+        
+        /* 其他登录方式分割线 */
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 30px 0 20px 0;
+            color: #555;
+        }
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #333;
+        }
+        .separator:not(:empty)::before {
+            margin-right: .5em;
+        }
+        .separator:not(:empty)::after {
+            margin-left: .5em;
+        }
+
+        /* 第三方登录图标 (简化) */
+        .third-party-login {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px;
+        }
+        .tp-icon {
+            font-size: 28px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s;
+        }
+        .tp-icon:hover {
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="weibo-logo">
+            微博
+        </div>
+        
+        <div class="input-group">
+            <input type="text" id="username-input" class="input-field" placeholder="邮箱/手机号" >
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="password-input" class="input-field" placeholder="密码" >
+        </div>
+        
+        <div id="error-message" style="color: #ff4d4f; margin-bottom: 15px; font-size: 14px; text-align: center;"></div>
+
+
+        <button class="login-btn" onclick="attemptLogin()">
+            登录
+        </button>
+
+        <div class="aux-links">
+            <a href="#">注册</a>
+            <a href="#">忘记密码？</a>
+        </div>
+
+        <div class="separator">
+            其他方式登录
+        </div>
+
+        <div class="third-party-login">
+            <span class="tp-icon" title="QQ登录">🐧</span>
+            <span class="tp-icon" title="微信登录">💬</span>
+            <span class="tp-icon" title="Apple登录">🍎</span>
+        </div>
+
+    </div>
+
+    <script>
+        function attemptLogin() {
+            // 定义正确的用户名和密码（与输入框的 value 属性一致）
+            const correctUsername = "zx0512@qmail.com";
+            const correctPassword = "Wb$2025*xZ"; 
+
+            // 获取用户输入的值
+            const enteredUsername = document.getElementById('username-input').value;
+            const enteredPassword = document.getElementById('password-input').value;
+            const errorMessageDiv = document.getElementById('error-message');
+
+            errorMessageDiv.textContent = ""; // 清除旧的错误信息
+
+            // 检查用户名和密码是否匹配
+            if (enteredUsername === correctUsername && enteredPassword === correctPassword) {
+                // 校验成功：跳转到新页面
+                window.location.href = "weiboWb$2025*xZ.html";
+            } else {
+                // 校验失败：显示错误信息
+                errorMessageDiv.textContent = "账号或密码错误，请重试。";
+            }
+        }
+    </script>
+
+</body>
+</html>

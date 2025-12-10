@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>转正申请表</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+            --ink-color: #000080; /* 模拟蓝色钢笔墨水 */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        /* --- Document Viewer Window --- */
+        .doc-viewer {
+            width: 900px;
+            height: 700px;
+            background: var(--mac-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            animation: popIn 0.4s ease-out;
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* Viewer Header (Controls + Title) */
+        .viewer-header {
+            height: 45px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .viewer-title { font-size: 14px; font-weight: 500; color: #333; flex-grow: 1; text-align: center; margin-right: 60px; }
+
+
+        /* --- PDF Content Area --- */
+        .viewer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 0;
+            display: flex;
+            justify-content: center;
+            background: #e9e9e9; /* Slightly darker gray to contrast the page */
+        }
+        .a4-page {
+            width: 794px;
+            min-height: 1123px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 50px 60px;
+            line-height: 1.8;
+            font-size: 14px;
+            color: #333;
+        }
+        .doc-title {
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 3px double #333;
+        }
+
+/* Table Styling */
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.info-table th, .info-table td {
+    border: 1px solid #999;
+    padding: 10px 15px;
+    text-align: left;
+}
+.info-table th {
+    background: #f7f7f7;
+    /* 调整为25%，让所有th（标题）宽度一致 */
+    width: 25%;
+    font-weight: 500;
+}
+.info-table td {
+    /* 调整为25%，让所有td（内容）宽度也与th一致，实现四列等宽 */
+    width: 25%;
+    font-weight: 400;
+}
+
+        /* Assessment Section */
+        .assessment-section {
+            margin-top: 30px;
+        }
+        .assessment-box {
+            border: 1px solid #999;
+            min-height: 150px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .assessment-box h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #1e88e5;
+        }
+        .assessment-box p {
+            text-indent: 2em;
+            margin-bottom: 8px;
+        }
+
+        /* Signature Block */
+        .signature-block {
+            margin-top: 80px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .signature-field {
+            text-align: right;
+            width: 300px;
+            line-height: 1.5;
+        }
+        .signature-field strong {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+        /* Handwritten Simulation */
+        .handwritten-signature {
+            /* 模拟手写体和墨水颜色 */
+            font-family: 'Arial Black', sans-serif; /* 粗体字体模拟笔迹 */
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--ink-color);
+            font-style: italic;
+            letter-spacing: -1px;
+            display: block;
+            margin-top: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px dashed #000;
+        }
+        .date-signed {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>预览</span>
+            <span>文件</span>
+            <span>视图</span>
+            <span>工具</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+
+    <div class="doc-viewer">
+        <div class="viewer-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="viewer-title">转正申请表_重要.docx</div>
+        </div>
+
+        <div class="viewer-content">
+            <div class="a4-page">
+                <div class="doc-title">
+                    员工转正申请与评估表
+                </div>
+
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th colspan="4" style="background: #e6e6e6; text-align: center;">基础信息</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>员工姓名</th>
+                            <td>许思默</td>
+                            <th>所属部门</th>
+                            <td>产品部</td>
+                        </tr>
+                        <tr>
+                            <th>岗位名称</th>
+                            <td>产品经理</td>
+                            <th>入职日期</th>
+                            <td>2025年7月1日</td>
+                        </tr>
+                        <tr>
+                            <th>试用期长</th>
+                            <td>6个月</td>
+                            <th>申请转正日期</th>
+                            <td>2026年1月1日</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="assessment-section">
+                    <h2>一、 试用期工作总结与自我评估 (自评)</h2>
+                    <div class="assessment-box">
+                        <h3>试用期工作完成情况及目标达成度</h3>
+                        <p>
+                            试用期内，主要负责“青苗计划”平台的V3.0迭代项目，完成了需求文档（PRD）的撰写、原型设计及跟进开发流程。V3.0版本已顺利上线，核心功能（实习岗位匹配）用户反馈良好，周活跃用户增长了15%。
+                        </p>
+                        <h3>自我能力评估</h3>
+                        <p>
+                            在业务理解和跨部门沟通方面取得了较大进步，能快速理解业务需求并转化为可执行的产品方案。但在技术深度和数据分析的专业度上仍有提升空间，未来将加强相关学习。
+                        </p>
+                        <h3>转正后的工作计划与承诺</h3>
+                        <p>
+                            转正后，将重点跟进二期项目，优化用户留存率。承诺将以更高的标准和主人翁精神投入工作，确保产品质量和业务目标达成。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assessment-section">
+                    <h2>二、 部门负责人/HR 评估意见 (待填写)</h2>
+                    <div class="assessment-box" style="min-height: 100px;">
+                        </div>
+                </div>
+
+                <div class="signature-block">
+                    <div class="signature-field">
+                        <strong>申请人签名：</strong>
+                        <span class="handwritten-signature">许思默</span>
+                        <div class="date-signed">日期：2024年11月20日</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

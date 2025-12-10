@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绩效数据表（待汇总）</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --excel-green: #217346; /* Excel Primary Green */
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+            --excel-grid: #d9d9d9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        /* --- Excel Application Window --- */
+        .excel-app {
+            width: 1200px;
+            height: 700px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* App Header */
+        .app-header {
+            height: 45px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .app-title { font-size: 14px; font-weight: 500; color: #333; margin-left: 10px; flex-grow: 1; text-align: center; }
+        
+        /* Excel Ribbon/Toolbar */
+        .excel-ribbon {
+            height: 100px;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            padding: 10px 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .ribbon-tabs {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        .ribbon-tabs span {
+            padding: 5px 8px;
+            cursor: pointer;
+        }
+        .ribbon-tabs span.active {
+            color: var(--excel-green);
+            border-bottom: 2px solid var(--excel-green);
+        }
+        .ribbon-controls {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            color: #444;
+        }
+        
+        /* Formula Bar */
+        .formula-bar {
+            height: 30px;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            font-size: 13px;
+        }
+        .cell-name {
+            width: 50px;
+            text-align: center;
+            font-weight: bold;
+            border-right: 1px solid #eee;
+            margin-right: 10px;
+        }
+        .fx-icon {
+            font-style: italic;
+            font-weight: bold;
+            color: #999;
+            margin-right: 10px;
+        }
+        .formula-input {
+            flex-grow: 1;
+            color: #333;
+        }
+
+        /* Spreadsheet Grid */
+        .spreadsheet-grid {
+            flex: 1;
+            display: flex;
+            overflow: auto;
+        }
+        .row-headers {
+            width: 40px;
+            flex-shrink: 0;
+            background: #f7f7f7;
+            border-right: 1px solid var(--excel-grid);
+        }
+        .row-header-cell {
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-bottom: 1px solid var(--excel-grid);
+            font-size: 12px;
+            color: #666;
+        }
+        .main-grid-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .column-headers {
+            height: 30px;
+            display: flex;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--excel-grid);
+        }
+        .column-header-cell {
+            width: 120px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            background: #f7f7f7;
+            border-right: 1px solid var(--excel-grid);
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+        .data-rows {
+            flex: 1;
+            overflow: auto;
+        }
+        .data-row {
+            display: flex;
+            border-bottom: 1px solid var(--excel-grid);
+        }
+        .data-cell {
+            width: 120px;
+            height: 30px;
+            line-height: 30px;
+            padding: 0 5px;
+            border-right: 1px solid var(--excel-grid);
+            font-size: 13px;
+            color: #333;
+            text-align: center;
+        }
+        .data-row:nth-child(even) .data-cell { background: #fcfcfc; }
+
+        /* --- Excel Formatting/Highlighting --- */
+        .header-row .data-cell {
+            font-weight: bold;
+            background: #eaf1f7 !important;
+            color: #1a1a1a;
+            text-align: center;
+        }
+        .center-text { text-align: center; }
+        
+        /* Conditional Formatting Styles for Abnormal Data */
+        .score-abnormal-high {
+            background-color: #d0f8d0 !important; /* Light green base */
+            border-left: 3px solid #00c700;
+            font-weight: 700;
+            color: var(--excel-green);
+        }
+        .score-abnormal-low {
+            background-color: #ffe0e0 !important; /* Light red base */
+            border-left: 3px solid var(--oa-red);
+            font-weight: 700;
+            color: var(--oa-red);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>Excel</span>
+            <span>文件</span>
+            <span>编辑</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四 10:58</span>
+        </div>
+    </div>
+
+    <div class="excel-app">
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="app-title">绩效数据表（待汇总） - Microsoft Excel</div>
+        </div>
+
+        <div class="excel-ribbon">
+            <div class="ribbon-tabs">
+                <span class="active">开始</span>
+                <span>插入</span>
+                <span>公式</span>
+                <span>数据</span>
+                <span>审阅</span>
+            </div>
+            <div class="ribbon-controls">
+                <span>🔍 查找</span>
+                <span>📋 格式刷</span>
+                <span>∑ 自动求和</span>
+                <span>💾 保存</span>
+            </div>
+        </div>
+
+        <div class="formula-bar">
+            <div class="cell-name">G1</div>
+            <div class="fx-icon">fx</div>
+            <div class="formula-input">当月绩效评分 (1.0-5.0)</div>
+        </div>
+
+        <div class="spreadsheet-grid">
+            
+            <div class="row-headers">
+                <div class="row-header-cell" style="background: #eaf1f7;"></div> <div class="row-header-cell">1</div>
+                <div class="row-header-cell">2</div>
+                <div class="row-header-cell">3</div>
+                <div class="row-header-cell">4</div>
+                <div class="row-header-cell">5</div>
+                <div class="row-header-cell">6</div>
+                <div class="row-header-cell">7</div>
+                <div class="row-header-cell">8</div>
+                <div class="row-header-cell">9</div>
+                <div class="row-header-cell">10</div>
+                <div class="row-header-cell">11</div>
+            </div>
+
+            <div class="main-grid-area">
+                
+                <div class="column-headers">
+                    <div class="column-header-cell" style="width: 80px;">A</div> <div class="column-header-cell" style="width: 100px;">B</div>
+                    <div class="column-header-cell" style="width: 100px;">C</div>
+                    <div class="column-header-cell" style="width: 120px;">D</div>
+                    <div class="column-header-cell" style="width: 150px;">E</div>
+                    <div class="column-header-cell" style="width: 120px;">F</div>
+                    <div class="column-header-cell" style="width: 100px;">G</div>
+                    <div class="column-header-cell" style="width: 150px;">H</div>
+                </div>
+
+                <div class="data-rows">
+                    
+                    <div class="data-row header-row">
+                        <div class="data-cell" style="width: 80px;">员工ID</div>
+                        <div class="data-cell" style="width: 100px;">姓名</div>
+                        <div class="data-cell" style="width: 100px;">部门</div>
+                        <div class="data-cell" style="width: 120px;">职位</div>
+                        <div class="data-cell" style="width: 150px;">当月绩效评分</div>
+                        <div class="data-cell" style="width: 120px;">KPI 完成度 (%)</div>
+                        <div class="data-cell" style="width: 100px;">绩效等级</div>
+                        <div class="data-cell" style="width: 150px;">备注</div>
+                    </div>
+                    
+                    <div class="data-row">
+                        <div class="data-cell center-text" style="width: 80px;">T0015</div>
+                        <div class="data-cell" style="width: 100px;">孙晨曦</div>
+                        <div class="data-cell" style="width: 100px;">市场部</div>
+                        <div class="data-cell" style="width: 120px;">市场专员</div>
+                        <div class="data-cell center-text" style="width: 150px;">3.5</div>
+                        <div class="data-cell center-text" style="width: 120px;">105%</div>
+                        <div class="data-cell center-text" style="width: 100px;">B+</div>
+                        <div class="data-cell" style="width: 150px;">稳定达标</div>
+                    </div>
+
+                    <div class="data-row">
+                        <div class="data-cell center-text" style="width: 80px;">P0122</div>
+                        <div class="data-cell" style="width: 100px;">许思默</div>
+                        <div class="data-cell" style="width: 100px;">产品部</div>
+                        <div class="data-cell" style="width: 120px;">产品经理</div>
+                        <div class="data-cell center-text" style="width: 150px;">4.1</div>
+                        <div class="data-cell center-text" style="width: 120px;">118%</div>
+                        <div class="data-cell center-text" style="width: 100px;">A</div>
+                        <div class="data-cell" style="width: 150px;">表现优秀</div>
+                    </div>
+
+                    <div class="data-row">
+                        <div class="data-cell center-text score-abnormal-high" style="width: 80px;">P0309</div>
+                        <div class="data-cell score-abnormal-high" style="width: 100px;">周子俊</div>
+                        <div class="data-cell score-abnormal-high" style="width: 100px;">市场部</div>
+                        <div class="data-cell score-abnormal-high" style="width: 120px;">市场经理</div>
+                        <div class="data-cell center-text score-abnormal-high" style="width: 150px;">4.9</div>
+                        <div class="data-cell center-text score-abnormal-high" style="width: 120px;">150%</div>
+                        <div class="data-cell center-text score-abnormal-high" style="width: 100px;">A+</div>
+                        <div class="data-cell score-abnormal-high" style="width: 150px;">超额完成季度指标</div>
+                    </div>
+
+                    <div class="data-row">
+                        <div class="data-cell center-text" style="width: 80px;">D0876</div>
+                        <div class="data-cell" style="width: 100px;">钱涛</div>
+                        <div class="data-cell" style="width: 100px;">研发部</div>
+                        <div class="data-cell" style="width: 120px;">软件工程师</div>
+                        <div class="data-cell center-text" style="width: 150px;">3.9</div>
+                        <div class="data-cell center-text" style="width: 120px;">110%</div>
+                        <div class="data-cell center-text" style="width: 100px;">A-</div>
+                        <div class="data-cell" style="width: 150px;">代码质量高</div>
+                    </div>
+
+                    <div class="data-row">
+                        <div class="data-cell center-text" style="width: 80px;">D0911</div>
+                        <div class="data-cell" style="width: 100px;">吴佳怡</div>
+                        <div class="data-cell" style="width: 100px;">研发部</div>
+                        <div class="data-cell" style="width: 120px;">测试工程师</div>
+                        <div class="data-cell center-text" style="width: 150px;">3.4</div>
+                        <div class="data-cell center-text" style="width: 120px;">102%</div>
+                        <div class="data-cell center-text" style="width: 100px;">B</div>
+                        <div class="data-cell" style="width: 150px;">正常范围</div>
+                    </div>
+                    
+                    <div class="data-row">
+                        <div class="data-cell center-text" style="width: 80px;">T0040</div>
+                        <div class="data-cell" style="width: 100px;">郑虹</div>
+                        <div class="data-cell" style="width: 100px;">市场部</div>
+                        <div class="data-cell" style="width: 120px;">营销经理</div>
+                        <div class="data-cell center-text" style="width: 150px;">4.5</div>
+                        <div class="data-cell center-text" style="width: 120px;">130%</div>
+                        <div class="data-cell center-text" style="width: 100px;">A+</div>
+                        <div class="data-cell" style="width: 150px;">表现优秀</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

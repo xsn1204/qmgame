@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日历</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+            --color-work: #3A8DFF;       /* 蓝色 - 工作 */
+            --color-hr: #26a69a;         /* 绿松石 - 人力/转正 */
+            --color-personal: #FF4081;   /* 粉色 - 个人 */
+            --color-team: #9c27b0;       /* 紫色 - 团队 */
+            --mail-blue: #007aff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: block;
+            user-select: none;
+        }
+        /* --- macOS Dock (底部应用栏) --- */
+        .mac-dock {
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            height: 64px;
+            background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 18px;
+            display: flex; align-items: center; padding: 0 12px; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 999;
+        }
+        /* Dock 链接样式：重要！覆盖 a 标签的默认下划线 */
+        .dock-link {
+            text-decoration: none;
+            color: inherit; 
+        }
+        /* Dock 图标样式 */
+        .dock-icon {
+            width: 48px; 
+            height: 48px; 
+            border-radius: 12px;
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            font-size: 26px; 
+            cursor: pointer; 
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dock-icon:hover { 
+            transform: translateY(-15px) scale(1.1); 
+            margin: 0 5px; 
+        }
+
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        /* --- Calendar Application Window --- */
+        .calendar-app {
+            width: 1000px; 
+            height: 700px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: fixed; 
+            top: 50%;         
+            left: 50%;        
+            transform: translate(-50%, -50%); 
+            z-index: 500;     
+        }
+
+        /* App Header */
+        .app-header {
+            height: 50px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+
+        .header-controls {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .header-controls button {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            color: #444;
+            font-size: 13px;
+        }
+        .header-date {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-left: 20px;
+        }
+
+        /* Main Content */
+        .calendar-content {
+            flex: 1;
+            display: flex;
+        }
+
+        /* Sidebar (Calendar List + Mini Month) */
+        .calendar-sidebar {
+            width: 250px;
+            background: var(--mac-bg);
+            border-right: 1px solid #ddd;
+            padding: 15px;
+            flex-shrink: 0;
+        }
+        .mini-month {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .calendar-list h3 {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        .calendar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+        }
+        .calendar-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* --- Month View Grid --- */
+        .month-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .day-headers {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            border-bottom: 1px solid #ddd;
+            background: #fcfcfc;
+        }
+        .day-header-cell {
+            padding: 10px 0;
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            border-left: 1px solid #f0f0f0;
+        }
+        .day-header-cell:first-child { border-left: none; color: #ff5e5e; } /* Sunday Red */
+        .day-header-cell:last-child { color: #ff5e5e; } /* Saturday Red */
+
+        .month-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            border-top: 1px solid #ddd;
+        }
+
+        .date-cell {
+            border: 1px solid #eee;
+            border-top: none;
+            border-left: none;
+            padding: 5px;
+            position: relative;
+            min-height: 100px;
+            overflow: hidden;
+        }
+        .date-cell.today { background: #fcf8e3; } /* Today Yellowish Background */
+        .date-cell.weekend { background: #fafafa; }
+        .date-cell.inactive { color: #ccc; }
+
+        .date-number {
+            font-size: 16px;
+            font-weight: 400;
+            color: #333;
+            text-align: right;
+            padding: 0 5px 5px 0;
+            line-height: 1;
+        }
+        .date-cell.today .date-number {
+            color: white;
+            background: var(--color-work);
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            line-height: 25px;
+            text-align: center;
+            font-weight: 600;
+            float: right;
+        }
+
+        /* Event Snippets */
+        .event-snippet {
+            font-size: 11px;
+            margin-top: 2px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: white;
+            display: block;
+        }
+        .event-work { background: var(--color-work); }
+        .event-hr { background: var(--color-hr); }
+        .event-team { background: var(--color-team); }
+        .event-personal { background: var(--color-personal); }
+    </style>
+</head>
+<body>
+    <div class="mac-dock">
+        <a href="note.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📝</div> 
+        </a>
+        <a href="mailbox.html" target="_blank" class="dock-link">
+            <div class="dock-icon" style="background: var(--mail-blue); color: white;">📧</div>
+        </a>
+        <a href="calendar.html" target="_blank" class="dock-link">
+            <div class="dock-icon" style="background: #E0E0E0; color: #000; font-size: 28px;">📅</div>
+        </a>
+        <a href="message.html" target="_blank" class="dock-link">
+            <div class="dock-icon">💬</div>
+        </a>
+        <a href="setting.html" target="_blank" class="dock-link">
+            <div class="dock-icon">⚙️</div>
+        </a>
+    </div>
+    <div class="mac-dock">
+        <a href="note.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📝</div> 
+        </a>
+        <a href="mailbox.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📧</div>
+        </a>
+        <a href="calendar.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📅</div>
+        </a>
+        <a href="message.html" target="_blank" class="dock-link">
+            <div class="dock-icon">💬</div>
+        </a>
+        <a href="setting.html" target="_blank" class="dock-link">
+            <div class="dock-icon">⚙️</div>
+        </a>
+    </div>
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>日历</span>
+            <span>文件</span>
+            <span>编辑</span>
+            <span>显示</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+
+    <div class="calendar-app">
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="header-controls">
+                <button>◀</button>
+                <button>▶</button>
+                <span class="header-date">2025年12月</span>
+                <button style="margin-left: auto;">日</button>
+                <button>周</button>
+                <button style="font-weight: bold;">月</button>
+            </div>
+        </div>
+
+        <div class="calendar-content">
+            <div class="calendar-sidebar">
+                <div class="mini-month">
+                    <p style="font-size:12px; font-weight:400; color:#999; margin-bottom: 5px;">2025年12月</p>
+                    <p style="font-size:36px;">4</p>
+                </div>
+                
+                <div class="calendar-list">
+                    <h3>我的日历</h3>
+                    <div class="calendar-item">
+                        <div class="calendar-dot" style="background: var(--color-work);"></div>
+                        工作
+                    </div>
+                    <div class="calendar-item">
+                        <div class="calendar-dot" style="background: var(--color-hr);"></div>
+                        会议
+                    </div>
+                    <div class="calendar-item">
+                        <div class="calendar-dot" style="background: var(--color-personal);"></div>
+                        节假日&纪念日
+                    </div>
+                    <div class="calendar-item">
+                        <div class="calendar-dot" style="background: var(--color-team);"></div>
+                        Siri建议
+                    </div>
+                </div>
+            </div>
+
+            <div class="month-view">
+                <div class="day-headers">
+                    <div class="day-header-cell">周日</div>
+                    <div class="day-header-cell">周一</div>
+                    <div class="day-header-cell">周二</div>
+                    <div class="day-header-cell">周三</div>
+                    <div class="day-header-cell">周四</div>
+                    <div class="day-header-cell">周五</div>
+                    <div class="day-header-cell">周六</div>
+                </div>
+
+                <div class="month-grid">
+                    <div class="date-cell weekend inactive"><div class="date-number">30</div></div>
+                    <div class="date-cell"><div class="date-number">1</div>
+                        <span class="event-snippet event-work">团队周例会</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">2</div></div>
+                    <div class="date-cell"><div class="date-number">3</div></div>
+                    <div class="date-cell today"><div class="date-number">4</div>
+                        <span class="event-snippet event-work">PRD 评审</span>
+                        <span class="event-snippet event-hr">实习生面试</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">5</div>
+                        <span class="event-snippet event-hr">转正沟通会议</span>
+                        <span class="event-snippet event-work">V4.0 规划</span>
+                    </div>
+                    <div class="date-cell weekend"><div class="date-number">6</div></div>
+
+                    <div class="date-cell weekend"><div class="date-number">7</div></div>
+                    <div class="date-cell"><div class="date-number">8</div>
+                        <span class="event-snippet event-work">团队周例会</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">9</div></div>
+                    <div class="date-cell"><div class="date-number">10</div></div>
+                    <div class="date-cell"><div class="date-number">11</div></div>
+                    <div class="date-cell"><div class="date-number">12</div></div>
+                    <div class="date-cell weekend"><div class="date-number">13</div></div>
+
+                    <div class="date-cell weekend"><div class="date-number">14</div></div>
+                    <div class="date-cell"><div class="date-number">15</div>
+                        <span class="event-snippet event-work">团队周例会</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">16</div></div>
+                    <div class="date-cell"><div class="date-number">17</div></div>
+                    <div class="date-cell"><div class="date-number">18</div>
+                        <span class="event-snippet event-personal">👩🎂</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">19</div></div>
+                    <div class="date-cell weekend"><div class="date-number">20</div></div>
+                    
+                    <div class="date-cell weekend"><div class="date-number">21</div></div>
+                    <div class="date-cell"><div class="date-number">22</div>
+                        <span class="event-snippet event-work">团队周例会</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">23</div></div>
+                    <div class="date-cell"><div class="date-number">24</div></div>
+                    <div class="date-cell"><div class="date-number">25</div>
+                        <span class="event-snippet event-personal">圣诞节</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">26</div></div>
+                    <div class="date-cell weekend"><div class="date-number">27</div></div>
+
+                    <div class="date-cell weekend"><div class="date-number">28</div></div>
+                    <div class="date-cell"><div class="date-number">29</div>
+                        <span class="event-snippet event-work">团队周例会</span>
+                    </div>
+                    <div class="date-cell"><div class="date-number">30</div></div>
+                    <div class="date-cell"><div class="date-number">31</div>
+                        <span class="event-snippet event-personal">跨年夜</span>
+                    </div>
+                    <div class="date-cell inactive"><div class="date-number">1</div></div>
+                    <div class="date-cell inactive"><div class="date-number">2</div></div>
+                    <div class="date-cell inactive weekend"><div class="date-number">3</div></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2024年青苗计划年度资金审计报告</title>
+    <style>
+        body {
+            font-family: 'SimSun', 'SimHei', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+        }
+        .report-page {
+            width: 800px;
+            min-height: 1100px; /* A4 尺寸高度模拟 */
+            background: white;
+            padding: 40px 60px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            line-height: 1.8;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+
+        /* 报告标题 */
+        .report-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .report-title h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .report-title h2 {
+            font-size: 20px;
+            color: #38a169;
+            margin-bottom: 25px;
+        }
+
+        /* 章节标题 */
+        .section-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        /* 审计师意见 */
+        .opinion-box {
+            border: 2px solid #38a169;
+            padding: 20px;
+            margin: 25px 0;
+            background-color: #f9fff9;
+        }
+        .opinion-box p {
+            font-style: italic;
+            line-height: 1.6;
+        }
+        .signature-box {
+            height: 60px;
+            margin-top: 10px;
+            position: relative;
+            }
+
+            .signature-text {
+                font-family: "KaiTi", "STKaiti", "Brush Script MT", cursive;
+                font-size: 38px;
+                color: #2c3e50;
+                transform: rotate(-6deg);
+                display: inline-block;
+                letter-spacing: 4px;
+                line-height: 1;
+            }
+
+            /* 模拟签名笔锋 */
+            .signature-text::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                bottom: 5px;
+                width: 120px;
+                height: 2px;
+                background: rgba(0, 0, 0, 0.25);
+            }
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #e6fffa;
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+        }
+        .data-row td:nth-child(2), .data-row td:nth-child(3) {
+            text-align: right;
+            font-weight: 500;
+        }
+        .total-row {
+            background-color: #d1f7d1;
+            font-weight: bold;
+        }
+        
+        /* 签名和日期 */
+        .signature-block {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-item {
+            width: 45%;
+        }
+        .signature-item p {
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            padding-top: 5px;
+        }
+
+        /* 更真实的签名字体风格 */
+        .signature-box {
+            position: relative;
+            margin-top: 15px;
+            height: 70px;
+        }
+
+        .signature-text {
+            font-family: "STXingkai", "FZShuTi", "KaiTi", serif;
+            font-size: 46px;
+            color: #111;
+            letter-spacing: 8px;
+            display: inline-block;
+            transform: rotate(-3deg);
+            font-weight: 500;
+        }
+
+        /* 模拟签名收笔拖痕 */
+        .signature-stroke {
+            position: absolute;
+            left: 0;
+            bottom: 18px;
+            width: 160px;
+            height: 2px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 2px;
+            transform: rotate(-2deg);
+        }
+    </style>
+</head>
+<body>
+
+<div class="report-page">
+
+    <div class="report-title">
+        <h1>2024年度资金审计报告</h1>
+        <h2>— 臻鼎集团·青苗计划公益基金 —</h2>
+        <p>报告编号：ZDJH-AUDIT-2024-001</p>
+        <p>审计日期：2025年1月10日</p>
+    </div>
+
+    <div class="section-header">第一部分：审计师意见</div>
+    <div class="opinion-box">
+        <p>我们审计了臻鼎集团青苗计划公益基金（以下简称“青苗计划”）截至2024年12月31日的资金收支情况。</p>
+        <p>我们认为，青苗计划的财务报表在所有重大方面均按照既定的公益基金会计准则公允列报，资金使用符合其宗旨。</p>
+        <p style="text-align: right; margin-top: 15px;">审计机构：中正信达会计师事务所</p>
+    </div>
+    
+    <div class="section-header">第二部分：年度资金收支总览 (单位：人民币 万元)</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>项目</th>
+                <th>2024年收入</th>
+                <th>2024年支出</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="data-row">
+                <td>主发起人（臻鼎集团）捐赠</td>
+                <td>12,000.00</td>
+                <td>N/A</td>
+            </tr>
+            <tr class="data-row">
+                <td>社会募集与利息收入</td>
+                <td>185.50</td>
+                <td>N/A</td>
+            </tr>
+            <tr class="data-row">
+                <td>实习与志愿补贴发放</td>
+                <td>N/A</td>
+                <td><span style="color: #e74c3c;">6,880.00</span></td>
+            </tr>
+            <tr class="data-row">
+                <td>项目运营与管理费用</td>
+                <td>N/A</td>
+                <td>3,120.50</td>
+            </tr>
+            <tr class="data-row">
+                <td>专项合作项目费用 (外部)</td>
+                <td>N/A</td>
+                <td><span style="color: #e74c3c;">2,185.00</span></td>
+            </tr>
+            <tr class="total-row">
+                <td>年度总计</td>
+                <td>12,185.50</td>
+                <td>12,185.50</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p style="font-style: italic;">审计发现摘要：资金已全部落实至公益用途，年末结余为零，符合预算规划。</p>
+
+    <div class="section-header">第三部分：重点支出明细分析</div>
+
+    <p>以下为支出占比较大的细分项的分析报告：</p>
+    
+    <table style="width: 80%;">
+        <thead>
+            <tr>
+                <th>支出类型</th>
+                <th>金额 (万元)</th>
+                <th>占总支出比例</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="data-row">
+                <td>直接向学生发放的补贴 (个人账户)</td>
+                <td>3,700.00</td>
+                <td>30.36%</td>
+            </tr>
+            <tr class="data-row">
+                <td>向合作机构支付的间接补贴</td>
+                <td><span style="color: #c0392b; font-weight: bold;">3,180.00</span></td>
+                <td>26.10%</td>
+            </tr>
+            <tr class="data-row">
+                <td>租金、行政人员薪酬 (运营费)</td>
+                <td>1,800.50</td>
+                <td>14.78%</td>
+            </tr>
+            <tr class="data-row">
+                <td>外部项目合作费用</td>
+                <td><span style="color: #c0392b; font-weight: bold;">2,185.00</span></td>
+                <td>17.93%</td>
+            </tr>
+            </tbody>
+    </table>
+
+    <p style="margin-top: 20px;">审计注释 A.4.1： </p>
+    <p>“向合作机构支付的间接补贴”主要用于支付与青苗计划合作的第三方企业，为学生提供的特殊技能培训和高强度项目补贴。</p>
+    
+    <p style="margin-top: 15px;">审计注释 B.5.2： </p>
+    <p>“外部项目合作费用”主要用于与相关机构在“城市微循环优化”项目中的合作支出。</p>
+
+    <div class="section-header">第四部分：结论与建议</div>
+    <p>青苗计划在2024年度资金管理方面合规，但我们建议未来进一步提高“间接补贴”的透明度，确保每一笔资金都能追踪到终端受助人账户，以更好地践行公益理念。</p>
+
+    <div class="signature-block">
+        <div class="signature-item">
+            <p><strong>审计负责人（张弛）签字：</strong></p>
+            <div class="signature-box">
+                <span class="signature-text">张弛</span>
+                <span class="signature-stroke"></span>
+            </div>
+        </div>
+    </div>
+
+    <p style="text-align: center; margin-top: 50px; color: #888;">— 报告完毕 —</p>
+
+</div>
+
+</body>
+</html>

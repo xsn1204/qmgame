@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OA费用报销单打印件</title>
+    <style>
+        body {
+            font-family: 'SimSun', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+        }
+        .oa-document {
+            width: 750px;
+            min-height: 800px;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            line-height: 1.6;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+
+        /* 标题区 */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 3px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* 基础信息表格 */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .info-table th, .info-table td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        .info-table th {
+            width: 15%;
+            background-color: #f0f0f0;
+            font-weight: normal;
+        }
+        .info-table td {
+            width: 35%;
+        }
+
+        /* 报销明细 */
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+        .detail-table th, .detail-table td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .detail-table th {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+        .total-row td {
+            font-weight: bold;
+            text-align: right;
+            background-color: #f9f9f9;
+        }
+        .total-row td:first-child {
+            text-align: center;
+        }
+
+        /* 审批流程 */
+        .approval-flow {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .approval-flow th, .approval-flow td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: center;
+            height: 60px; /* 留出签名空间 */
+        }
+        .approval-flow th {
+            width: 10%;
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        /* 签名占位符和日期 */
+        .signature-box {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #1a5276; /* 模拟蓝色电子签名 */
+            font-weight: bold;
+        }
+        .signature-date {
+            font-size: 10px;
+            color: #888;
+            margin-top: 2px;
+        }
+        .note {
+            font-size: 12px;
+            color: #777;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="oa-document">
+
+        <div class="header">
+            <h1>青源数科 OA 费用报销单</h1>
+            <p>表单编号：BX202511050012 | 打印时间：2025-11-20</p>
+        </div>
+
+        <table class="info-table">
+            <tr>
+                <th>报销人</th>
+                <td>许思默</td>
+                <th>部门/项目</th>
+                <td>产品部</td>
+            </tr>
+            <tr>
+                <th>报销日期</th>
+                <td>2025-11-05</td>
+                <th>报销类别</th>
+                <td>软件及工具采购</td>
+            </tr>
+            <tr>
+                <th>报销币种</th>
+                <td>人民币 (CNY)</td>
+                <th>关联项目编码</th>
+                <td>PM-QM-2025-A1</td>
+            </tr>
+        </table>
+
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">序号</th>
+                    <th style="width: 40%;">摘要/用途</th>
+                    <th style="width: 15%;">单据张数</th>
+                    <th style="width: 20%;">金额 (RMB)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>墨刀 (MODAO) 企业版年费订阅</td>
+                    <td>1</td>
+                    <td>1,999.00</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Axure RP 授权费用 (产品原型工具)</td>
+                    <td>1</td>
+                    <td>4,000.00</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>UI/UX 设计素材库年费</td>
+                    <td>1</td>
+                    <td>800.00</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right; padding-right: 10px;">合计金额（大写）: 伍仟柒佰玖拾玖元整</td>
+                    <td>5,799.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="approval-flow">
+            <thead>
+                <tr>
+                    <th colspan="3">审批流程</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="width: 33.3%;">申请人</td>
+                    <td style="width: 33.3%;">财务审核</td>
+                    <td style="width: 33.3%;">分管副总</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="signature-box">许思默 (已提交)</div>
+                        <div class="signature-date">2025-11-05</div>
+                    </td>
+                    <td>
+                        <div class="signature-box" style="color: #008000;">冯静宜 (已审核)</div>
+                        <div class="signature-date">2025-11-07</div>
+                    </td>
+                    <td>
+                        <div class="signature-box" style="color: #cc0000;">无权限查看 (已批准)</div>
+                        <div class="signature-date">2025-11-18</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <p>财务部门留存联，请勿折叠。</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

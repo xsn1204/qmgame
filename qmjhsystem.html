@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统维护通知</title>
+    <style>
+        :root {
+            --primary-green: #38a169;
+            --alert-red: #e74c3c; /* 用于强调暂停访问 */
+            --text-color: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            background: #f7f7f7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .notice-container {
+            width: 100%;
+            max-width: 500px; /* 调整宽度以适应通知 */
+            background: #fff;
+            padding: 50px 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 5px solid var(--alert-red); /* 顶部红色边框强调 */
+        }
+
+        .notice-container h1 {
+            color: var(--alert-red);
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .notice-container p {
+            color: var(--text-color);
+            margin-bottom: 30px;
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .notice-container strong {
+            color: var(--primary-green);
+            font-weight: bold;
+        }
+
+        .contact-info {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="notice-container" id="noticeBox">
+        <h1>系统暂停访问通知</h1>
+
+        <p>
+            尊敬的用户：<br><br>
+            由于系统正在进行安全升级，为保障您的资产和信息安全，青苗计划申领系统已暂时关闭访问权限。<br><br>
+            我们对由此带来的不便深表歉意。预计恢复访问时间请留意官方通知。感谢您的理解与配合！
+        </p>
+        
+        <div class="contact-info">
+            如有紧急疑问，请联系：0532-XXXXXXX
+        </div>
+    </div>
+
+</body>
+</html>

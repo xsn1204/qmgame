@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胡志刚驾驶证复印件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SimSun', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        /* 证件容器：正页和副页统一尺寸 450px x 280px */
+        .license-card {
+            width: 450px; 
+            height: 280px; 
+            padding: 15px; 
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* 驾驶证通用头部 */
+        .license-header {
+            text-align: center;
+            margin-bottom: 5px; 
+        }
+
+        .license-header h1 {
+            font-size: 22px; 
+            font-weight: 900;
+            color: #cc0000;
+            letter-spacing: 1px;
+            margin-bottom: 1px;
+        }
+
+        .license-header h2 {
+            font-size: 15px; 
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        /* 证件信息行 */
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px; 
+            font-size: 13px; 
+        }
+
+        .info-label {
+            width: 70px;
+            color: #555;
+            flex-shrink: 0;
+            text-align: right;
+            padding-right: 8px;
+        }
+
+        .info-value {
+            flex-grow: 1;
+            font-weight: bold;
+            color: #000;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 1px;
+            /* 确保文本不被强制换行 */
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 模拟照片占位符 */
+        .photo-placeholder {
+            width: 75px; 
+            height: 95px; 
+            background-color: #eee;
+            border: 1px solid #ccc;
+            position: absolute;
+            top: 60px; 
+            right: 15px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* *** 针对长证件号码的特殊优化 *** */
+        .primary-license .info-row:last-child {
+            margin-top: 10px;
+        }
+        .primary-license .info-row:last-child .info-label {
+            width: 80px; /* 稍微扩大标签宽度 */
+        }
+        .primary-license .info-row:last-child .info-value {
+             font-size: 13px; /* 保持与内容行一致的字体大小 */
+             border-bottom: none; /* 移除下划线，以最大化水平空间 */
+             padding-bottom: 0;
+        }
+        /* ******************************* */
+
+
+        /* 副页信息调整 */
+        .secondary-license .info-row {
+            margin-bottom: 7px; 
+        }
+        .secondary-license .info-row:nth-child(5) { 
+            margin-top: 20px; 
+        }
+        .secondary-license .info-row:nth-child(7) { 
+            margin-top: 10px;
+        }
+
+
+        /* 模拟公章水印 */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 80px;
+            color: rgba(204, 0, 0, 0.1);
+            font-weight: 900;
+            user-select: none;
+            z-index: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        
+        /* 突出显示您提供的信息 */
+        .highlight-plate {
+            color: #cc0000;
+            font-size: 14px;
+        }
+        .highlight-phone {
+            color: #007aff;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="license-card primary-license">
+        <div class="watermark">中华人民共和国</div>
+        
+        <div class="license-header">
+            <h1>中华人民共和国</h1>
+            <h2>机动车驾驶证</h2>
+        </div>
+
+        <div class="photo-placeholder">照片</div>
+
+        <div class="info-row">
+            <span class="info-label">姓名</span>
+            <span class="info-value">胡志刚</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">性别</span>
+            <span class="info-value">男</span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">国籍</span>
+            <span class="info-value">中国</span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">住址</span>
+            <span class="info-value">临渊省青州市天云区中山路167号</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">出生日期</span>
+            <span class="info-value">1985-04-20</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">初次领证</span>
+            <span class="info-value">2010-08-15</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">准驾车型</span>
+            <span class="info-value">C1E</span>
+        </div>
+
+    </div>
+
+    <div class="license-card secondary-license">
+        <div class="watermark">交通管理局</div>
+        
+        <div class="license-header">
+            <h2>中华人民共和国机动车驾驶证副页</h2>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">档案编号</span>
+            <span class="info-value">126786628932</span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">有效期限</span>
+            <span class="info-value">2022-08-15 至 2028-08-15</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">证件号码</span>
+            <span class="info-value">44019389766768702</span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">车牌号码</span>
+            <span class="info-value highlight-plate">临A 2U836</span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">联系方式</span>
+            <span class="info-value highlight-phone">13627728003</span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">签发单位</span>
+            <span class="info-value">临渊省公安厅交通管理局</span>
+        </div>
+        
+        <div class="info-row" style="margin-top: auto;">
+            <span class="info-label"></span>
+            <span class="info-value" style="border-bottom: none;"></span>
+        </div>
+    </div>
+
+</body>
+</html>

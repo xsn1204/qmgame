@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮件</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --mail-blue: #007aff; 
+            --mail-sidebar: #f2f2f7;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+            --encrypted-red: #cc0000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            /* 恢复桌面的背景渐变 */
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: block;
+            user-select: none;
+        }
+
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; 
+            color: #333; 
+            z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 500; text-shadow: none; }
+        .menubar-right span { margin-left: 15px; text-shadow: none; }
+
+        /* --- macOS Dock (底部应用栏) - 保持不变 --- */
+        .mac-dock {
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            height: 64px;
+            background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 18px;
+            display: flex; align-items: center; padding: 0 12px; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 999;
+        }
+        .dock-link {
+            text-decoration: none;
+            color: inherit; 
+        }
+        .dock-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 26px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dock-icon:hover { transform: translateY(-15px) scale(1.1); margin: 0 5px; }
+
+        /* --- Mail Application Window (Initial State: Hidden) --- */
+        .mail-app {
+            width: 1200px;
+            height: 700px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: fixed; 
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 500;
+            opacity: 0; /* 默认隐藏 */
+            pointer-events: none; /* 默认不可交互 */
+            transition: opacity 0.3s ease;
+        }
+        .mail-app.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* --- LOGIN OVERLAY STYLES (登录界面样式) --- */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.2); /* 略微变暗的背景 */
+            backdrop-filter: blur(5px); /* 毛玻璃效果 */
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+        .login-modal {
+            width: 400px; padding: 30px;
+            background: rgba(255, 255, 255, 0.85); /* 半透明背景 */
+            backdrop-filter: blur(20px); /* 模态窗口自身的强力毛玻璃效果 */
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5); /* 浅色边框 */
+        }
+        .login-modal h2 {
+            font-size: 20px; font-weight: 600; color: #333; margin-bottom: 5px;
+        }
+        .login-modal p {
+            font-size: 13px; color: #777; margin-bottom: 25px;
+        }
+        .login-modal input {
+            width: 100%; padding: 10px 15px; margin-bottom: 15px;
+            border: 1px solid #ccc; border-radius: 8px;
+            font-size: 15px;
+            background: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none; /* 移除默认样式 */
+        }
+        .login-modal input:focus {
+            border-color: var(--mail-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            outline: none;
+        }
+        .login-modal button {
+            width: 100%; padding: 12px 15px;
+            background: var(--mail-blue); color: white;
+            border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+        }
+        .login-modal button:hover {
+            background: #006ddb;
+        }
+        .login-modal button:active {
+            opacity: 0.8;
+        }
+
+        /* --- Mail App 内的样式 (保持不变) --- */
+        .app-header { height: 45px; background: var(--mac-bg); border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 15px; }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .app-title { font-size: 14px; font-weight: 500; color: #333; margin-left: 10px; flex-grow: 1; text-align: center; }
+        .mail-content { flex: 1; display: flex; overflow: hidden; }
+        .mail-sidebar { width: 200px; background: var(--mail-sidebar); border-right: 1px solid #ddd; padding: 20px 0; flex-shrink: 0; font-size: 14px; }
+        .folder-item { padding: 8px 15px; color: #444; display: flex; justify-content: space-between; cursor: pointer; }
+        .folder-item.active { background: var(--mail-blue); color: white; }
+        .folder-item:hover:not(.active) { background: #e8e8e8; }
+        .unread-count { background: #bbb; color: white; padding: 1px 6px; border-radius: 10px; font-size: 12px; }
+        .folder-item.active .unread-count { background: white; color: var(--mail-blue); }
+        .mail-list { width: 350px; border-right: 1px solid #ddd; overflow-y: auto; flex-shrink: 0; }
+        .mail-item { padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.1s; }
+        .mail-item:hover { background: #f5f5f5; }
+        .mail-item.selected { background: #dcdcdc; }
+        .mail-header { display: flex; justify-content: space-between; margin-bottom: 3px; }
+        .mail-sender { font-weight: 700; font-size: 14px; color: #333; }
+        .mail-time { font-size: 12px; color: #777; }
+        .mail-subject { font-weight: 500; font-size: 13px; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;}
+        .mail-preview { font-size: 12px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mail-item.encrypted { background: #ffebeb; border-left: 5px solid var(--encrypted-red); padding: 12px 15px; }
+        .mail-item.encrypted .mail-sender, .mail-item.encrypted .mail-subject { color: var(--encrypted-red); font-weight: 900; }
+        .mail-item.encrypted .mail-subject { font-size: 15px; }
+        .mail-reading-pane { flex: 1; padding: 30px; overflow-y: auto; background: #fff; }
+        .reading-header h2 { font-size: 24px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .reading-meta { font-size: 13px; color: #777; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
+        .reading-meta strong { color: #333; font-weight: 600; margin-right: 5px; }
+        .reading-body p { line-height: 1.8; color: #555; margin-bottom: 15px; font-size: 14px; }
+        .reading-encrypted-note { border: 2px dashed var(--encrypted-red); padding: 20px; margin-bottom: 20px; background: #fffafa; color: var(--encrypted-red); font-weight: bold; text-align: center; }
+        .meeting-tag { color: var(--mail-blue); font-weight: 700; }
+        .gift-tag { color: orange; font-weight: 700; }
+        .spam-tag { color: gray; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-modal">
+            <h2>📧 欢迎使用 Mailbox</h2>
+            <p>请输入您的账户信息。</p>
+            <input type="email" id="emailInput" placeholder="邮箱地址">
+            <input type="password" id="passwordInput" placeholder="密码">
+            <button onclick="attemptLogin()">登录</button>
+        </div>
+    </div>
+    
+    <div class="mac-dock">
+        <a href="note.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📝</div> 
+        </a>
+        <a href="mailbox.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📧</div>
+        </a>
+        <a href="calendar.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📅</div>
+        </a>
+        <a href="message.html" target="_blank" class="dock-link">
+            <div class="dock-icon">💬</div>
+        </a>
+        <a href="setting.html" target="_blank" class="dock-link">
+            <div class="dock-icon">⚙️</div>
+        </a>
+    </div>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>邮件</span>
+            <span>邮箱</span>
+            <span>信息</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+
+    <div id="mailApp" class="mail-app">
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <span style="font-size: 16px; margin-left: 20px;">✉️</span>
+            <span style="font-size: 14px; margin-left: 10px; color: #555;">收件箱</span>
+            <div class="app-title"></div>
+            <span style="margin-right: 20px; color: var(--mail-blue);">⚙️</span>
+        </div>
+
+        <div class="mail-content">
+            
+            <div class="mail-sidebar">
+                <div style="padding: 0 15px; font-weight: 600; margin-bottom: 10px; color: var(--mail-blue);">我的账户</div>
+                <div class="folder-item active" id="folder-inbox" onclick="switchFolder('inbox')">
+                    <span>收件箱</span>
+                    <span class="unread-count">5</span>
+                </div>
+                <div class="folder-item">
+                    <span>已发送</span>
+                    <span>120</span>
+                </div>
+                <div class="folder-item">
+                    <span>草稿</span>
+                    <span>1</span> 
+                </div>
+                <div class="folder-item" id="folder-deleted" onclick="switchFolder('deleted')">
+                    <span>已删除</span>
+                    <span>1</span>
+                </div>
+                <div class="folder-item">
+                    <span>垃圾邮件</span>
+                    <span class="unread-count" style="background: var(--encrypted-red); color: white;">99+</span>
+                </div>
+            </div>
+
+         <div id="inboxList" class="mail-list">
+
+
+
+
+    <div class="mail-item" onclick="loadEmail('meeting')">
+        <div class="mail-header">
+            <span class="mail-sender meeting-tag">日程提醒</span>
+            <span class="mail-time">周一</span>
+        </div>
+        <div class="mail-subject">[会议] 团队周例会 (10:00)</div>
+        <div class="mail-preview">您好，您有一个定时会议提醒：主题：团队周例会...</div>
+    </div>
+
+    <div class="mail-item encrypted selected" onclick="loadEmail('encrypted')">
+        <div class="mail-header">
+            <span class="mail-sender">Security System</span>
+            <span class="mail-time">周一</span>
+        </div>
+        <div class="mail-subject">系统权限状态变更通知</div>
+        <div class="mail-preview">您在青苗计划管理后台中的相关访问权限已于...</div>
+    </div>
+
+    <div class="mail-item" onclick="loadEmail('regular')">
+        <div class="mail-header">
+            <span class="mail-sender">冯静宜</span>
+            <span class="mail-time">5天前</span>
+        </div>
+        <div class="mail-subject">报销单已处理</div>
+        <div class="mail-preview">尊敬的员工，你于系统中提交的报销申请（单号：...</div>
+    </div>
+
+
+        <div class="mail-item" onclick="loadEmail('gift')">
+        <div class="mail-header">
+            <span class="mail-sender gift-tag">HR 人事部</span>
+            <span class="mail-time">一周前</span>
+        </div>
+        <div class="mail-subject">🎁 年末福利领取通知及指引</div>
+        <div class="mail-preview">亲爱的员工们：年末将至，公司为您准备了一份心意...</div>
+    </div>
+
+    <div class="mail-item" onclick="loadEmail('spam')" style="opacity: 0.6;">
+        <div class="mail-header">
+            <span class="mail-sender">亚马逊促销</span>
+            <span class="mail-time">两周前</span>
+        </div>
+        <div class="mail-subject">🛍️ 黑色星期五数码产品限时折扣!</div>
+        <div class="mail-preview">您的购物车内商品已降价，立即查看！</div>
+    </div>
+
+</div>
+
+<div id="deletedList" class="mail-list" style="display:none;">
+
+    <div class="mail-item selected" onclick="loadEmail('deleted')" style="opacity:0.7; font-style: italic;">
+        <div class="mail-header">
+            <span class="mail-sender">已删除 (已离职)</span>
+            <span class="mail-time">2025/11/15</span>
+        </div>
+        <div class="mail-subject">关于新岗位的一些个人建议...</div>
+    </div>
+
+</div>
+
+            <div id="readingPane" class="mail-reading-pane">
+                <p style="text-align: center; color: #aaa; margin-top: 100px;">请从左侧列表中选择一封邮件进行阅读。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 目标账户信息
+        const CORRECT_EMAIL = "SilenceX@qmail.com";
+        const CORRECT_PASSWORD = "19771218";
+
+        // DOM 元素
+        const loginOverlay = document.getElementById('loginOverlay');
+        const mailApp = document.getElementById('mailApp');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const readingPane = document.getElementById('readingPane');
+        function getMailItems() {
+            return document.querySelectorAll('.mail-item');
+    }   
+
+        // 登录逻辑
+        function attemptLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (email === CORRECT_EMAIL && password === CORRECT_PASSWORD) {
+                // 登录成功
+                loginOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loginOverlay.style.display = 'none'; // 隐藏登录层
+                    mailApp.classList.add('show');       // 显示邮件应用
+                    loadEmail('encrypted');              // 恢复默认加载加密邮件
+                    document.title = "macOS 邮件 - 收件箱"; // 恢复页面标题
+                }, 300);
+            } else {
+                // 登录失败：简单提示并清空密码
+                alert('登录失败：密码错误🎂');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+
+        // 邮件内容数据 (更新了 key 为 'deleted')
+        const emailContents = {
+            // ⚡️ 修改点 3：键名改为 'deleted'
+            'deleted': { 
+                sender: "（已离职） <former_employee@corp.com>",
+                subject: "关于新岗位的一些个人建议...",
+                time: "2025年11月15日 (定时发送)",
+                body: `
+                    <p>你好：</p>
+                    <p>这是我留下的“自动发送”邮件。</p>
+                    <p>如果它触发了，说明你已经取代了我的位置，而且他们相信你背景干净，可以培养。</p>
+                    <p>切记：这个公司不是你看到的样子。</p>
+                    <p>不要相信任何人，从最不合理的地方开始查起。</p>
+                    <p>愿你早日找到真相。</p>
+                    <p style="font-style: italic; color: #777; margin-top: 30px;">Use it wisely [Wb$2025*xZ]</p>
+                `
+            },
+'encrypted': {
+    sender: "Security System（no-reply@sec.qysk.com）",
+    subject: "<strong>系统权限状态变更通知</strong>",
+    time: "2025年12月1日 02:48",
+    body: `
+
+        <p>
+            您在<strong>青苗计划管理后台</strong>中的相关访问权限已于
+            <strong>2025年12月1日 02:45</strong> 被正式关闭并清除。
+        </p>
+
+        <p>
+            涉及账号：Xu.sm@qysk.com<br>
+            处理类型：权限禁用、账户数据删除<br>
+            日志编号：SYS-ACL-DEL-20251201-9472
+        </p>
+
+        <div style="margin-top: 20px; padding: 12px; border: 1px dashed #c0392b; background: #fff5f5;">
+            请注意：该操作为<strong>不可逆操作</strong>，历史配置与访问策略已同步从安全域中清除。
+        </div>
+
+        <p style="text-align: right; margin-top: 40px; color: #555;">
+            — [系统自动发送]
+        </p>
+    `
+},
+
+            'gift': {
+                sender: "AD行政部（adteam@qysk.com）",
+                subject: "🎁 年末福利领取通知及指引",
+                time: "2025年11月27日 10:30",
+                body: `
+                    <p>亲爱的员工们：</p>
+                    <p>年末将至，公司为您准备了一份心意。请点击下方链接进入福利系统，选择您喜欢的礼品套餐或等值电子礼金。</p>
+                    <p style="background: #eaf7f7; padding: 15px; border-radius: 5px;"><strong>>> 点击此处领取福利 <<</strong></p>
+                    <p>领取截止日期：下周五。祝大家节日愉快！</p>
+                `
+            },
+            'regular': {
+                sender: "冯静宜（feng.jy@qysk.com）",
+                subject: "报销单已处理",
+                time: "2025年11月30日 18:45",
+                body: `
+                    <p>尊敬的员工，</p>
+                    <p>你于系统中提交的报销申请（单号：EXP20251105-004）已完成审核与处理，相关费用已进入财务支付流程或完成入账，请你留意后续到账情况。</p>
+                    <p>如你对本次报销结果有任何疑问，请通过公司内部系统或联系财务部门进行咨询。</p>
+                    <p>感谢你的配合！</p>
+                    <p>财务部</p>
+                    <p>（本邮件由系统自动发送，请勿回复）<p>
+                `
+            },
+            'meeting': {
+                sender: "日程提醒（calendar@qysk.com）",
+                subject: "[会议] 周例会 (10:00)",
+                time: "2025年12月1日 9:30",
+                body: `
+                    <p>您好，</p>
+                    <p>您有一个定时会议提醒：</p>
+                    <p style="background: #e8f0ff; padding: 15px; border-radius: 5px;"><strong>主题:</strong> 团队周例会<br>
+                    <strong>时间:</strong> 今天下午 14:00 - 15:00<br>
+                    <strong>地点:</strong> 10F 新芽会议室 / Zoom ID: 908-765-4321</p>
+                    <p>会议议程：1. 4.0版本迭代。 2. 前端界面优化进度。3. 用户反馈问题总结。</p>
+                `
+            },
+
+            'spam': {
+                sender: "亚马逊促销 <promotion@amazon.com>",
+                subject: "🛍️ 黑色星期五数码产品限时折扣!",
+                time: "2025年11月20日 09:15",
+                body: `
+                    <p style="color: gray;">此邮件已被标记为促销/广告邮件</p>
+                    <p>嗨，科技爱好者！</p>
+                    <p>您购物车中的商品：最新款无线降噪耳机，价格已降至历史最低！黑色星期五促销正在火热进行中！千万不要错过这次购买心仪数码产品的最佳机会！</p>
+                `
+            }
+        };
+
+        // 加载邮件内容函数
+        function loadEmail(type) {
+            const content = emailContents[type];
+            let metaHtml = `<strong>发件人:</strong> ${content.sender}<br>`;
+            
+            // 如果邮件有收件人（如已删除的草稿邮件），则显示收件人
+            if (content.recipient) {
+                metaHtml += `<strong>收件人:</strong> ${content.recipient}<br>`;
+            }
+            
+            metaHtml += `<strong>时间:</strong> ${content.time}`;
+
+            // 更新邮件阅读窗格
+            readingPane.innerHTML = `
+                <div class="reading-header">
+                    <h2>${content.subject}</h2>
+                </div>
+                <div class="reading-meta">
+                    ${metaHtml}
+                </div>
+                <div class="reading-body">
+                    ${content.body}
+                </div>
+            `;
+            
+            // 切换选中状态
+            getMailItems().forEach(item => item.classList.remove('selected'));
+            const current = document.querySelector(`.mail-item[onclick="loadEmail('${type}')"]`);
+if (current) current.classList.add('selected');
+        }
+
+        // 页面加载时默认将焦点设置在邮箱输入框
+            document.addEventListener('DOMContentLoaded', () => {
+                // 让邮箱默认存在
+                emailInput.value = "";
+
+                // 密码保持为空
+                passwordInput.value = "";
+
+                // 确保应用程序在初始时是隐藏的
+                mailApp.classList.remove('show');
+                loginOverlay.style.display = 'flex';
+            });
+            function switchFolder(type) {
+    // 清除高亮
+    document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
+
+    if (type === 'deleted') {
+        document.getElementById('inboxList').style.display = 'none';
+        document.getElementById('deletedList').style.display = 'block';
+        document.getElementById('folder-deleted').classList.add('active');
+        loadEmail('deleted');
+    } else {
+        document.getElementById('deletedList').style.display = 'none';
+        document.getElementById('inboxList').style.display = 'block';
+        document.getElementById('folder-inbox').classList.add('active');
+        loadEmail('encrypted');
+    }
+}
+
+    </script>
+</body>
+</html>

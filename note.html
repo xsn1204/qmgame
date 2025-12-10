@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备忘录</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --notes-yellow: #fff8e6; /* 备忘录纸张颜色 */
+            --notes-sidebar-bg: #f5f5f7;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: block;
+            user-select: none;
+        }
+                /* --- macOS Dock (底部应用栏) --- */
+        .mac-dock {
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            height: 64px;
+            background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 18px;
+            display: flex; align-items: center; padding: 0 12px; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 999;
+        }
+/* Dock 链接样式：重要！覆盖 a 标签的默认下划线 */
+        .dock-link {
+            text-decoration: none;
+            color: inherit; 
+        }
+        /* Dock 图标样式 */
+        .dock-icon {
+            width: 48px; 
+            height: 48px; 
+            border-radius: 12px;
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            font-size: 26px; 
+            cursor: pointer; 
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dock-icon:hover { 
+            transform: translateY(-15px) scale(1.1); 
+            margin: 0 5px; 
+        }
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        /* --- Notes Application Window --- */
+        .notes-app {
+            width: 1000px;
+            height: 650px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: fixed; 
+            top: 50%;         
+            left: 50%;        
+            transform: translate(-50%, -50%); 
+            z-index: 500;  
+        }
+
+        /* App Header */
+        .app-header {
+            height: 45px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .app-title { font-size: 14px; font-weight: 500; color: #333; margin-left: 10px; }
+
+        /* Content Area */
+        .notes-main-content {
+            flex: 1;
+            display: flex;
+        }
+
+        /* 1. Folder Sidebar */
+        .notes-sidebar {
+            width: 180px;
+            background: var(--notes-sidebar-bg);
+            border-right: 1px solid #ddd;
+            padding: 20px 10px;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        .folder-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            color: #333;
+            cursor: pointer;
+        }
+        .folder-item.active { background: #e0e0e0; font-weight: 600; color: #1e88e5; }
+        .folder-item span { margin-right: 8px; }
+
+        /* 2. Notes List */
+        .notes-list {
+            width: 280px;
+            background: #fff;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+        }
+        .note-preview {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .note-preview:hover { background: #f5f5f5; }
+        .note-preview.selected { background: #d3eafc; }
+
+        .note-preview h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .note-preview p {
+            font-size: 12px;
+            color: #777;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 3. Note Content */
+        .notes-content-area {
+            flex: 1;
+            background: var(--notes-yellow);
+            padding: 40px;
+            overflow-y: auto;
+        }
+        .note-detail h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 400;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+        .note-detail p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        /* Encrypted Block Styling */
+        .encrypted-block-wrapper {
+            background: #fcfcfc;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .encrypted-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e88e5;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .encrypted-button:hover { background: #1565c0; }
+        .encrypted-button span { margin-right: 8px; }
+        
+        #decrypted-content {
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+            margin-top: 15px;
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 6px;
+            color: #333;
+            font-size: 13px;
+            display: none; /* Initially hidden */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>备忘录</span>
+            <span>文件</span>
+            <span>编辑</span>
+            <span>查看</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+    <div class="mac-dock">
+        <a href="note.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📝</div> 
+        </a>
+        <a href="mailbox.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📧</div>
+        </a>
+        <a href="calendar.html" target="_blank" class="dock-link">
+            <div class="dock-icon">📅</div>
+        </a>
+        <a href="message.html" target="_blank" class="dock-link">
+            <div class="dock-icon">💬</div>
+        </a>
+        <a href="setting.html" target="_blank" class="dock-link">
+            <div class="dock-icon">⚙️</div>
+        </a>
+    </div>
+    <div class="notes-app">
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="app-title">备忘录</div>
+        </div>
+
+        <div class="notes-main-content">
+            <div class="notes-sidebar">
+                <div style="font-size: 11px; color: #999; margin-bottom: 10px;">文件夹</div>
+                <div class="folder-item active"><span>📒</span> 备忘录</div>
+                <div class="folder-item"><span>🗑️</span>已删除</div>
+            </div>
+
+            <div class="notes-list">
+                <div class="note-preview" onclick="loadNote('note2')">
+                    <h4>产品周报草稿</h4>
+                    <p>2025.11.15 | 下周二会议重点...</p>
+                </div>
+                <div class="note-preview" onclick="loadNote('note3')">
+                    <h4>报销流程</h4>
+                    <p>2025.9.28 | OA网址：qyskoa.html</p>
+                </div>
+            </div>
+
+            <div id="notes-content-area" class="notes-content-area">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 笔记内容数据 ---
+        const notesData = {
+            note2: `
+                <div class="note-detail">
+                    <h2>产品周报草稿</h2>
+                    <p style="color: #666; font-style: italic;">创建于 2025年11月15日</p>
+                    <p><strong>本周重点完成：</strong></p>
+                    <ul style="list-style:disc; margin-left: 20px;">
+                        <li>V3.0 上线后数据监控，用户增长符合预期。</li>
+                        <li>完成转正文件自评部分，等待HR部门反馈。</li>
+                    </ul>
+                    <p><strong>下周待办：</strong></p>
+                    <p>组织 V4.0 规划预研会议，重点讨论“青苗计划”补贴发放流程的简化方案。约见市场部负责人。</p>
+                </div>
+            `,
+            note3: `
+                <div class="note-detail">
+                    <h2>报销流程</h2>
+                    <p style="color: #666; font-style: italic;">创建于 2024年09月28日</p>
+                    <p>OA网址：qyskoa.html</p>
+                    <ul style="list-style:disc; margin-left: 20px;">
+                        <li>填写申请: 登录OA系统，进入“费用报销”模块，选择报销类型，填写金额和事由。</li>
+                        <li>上传附件: 拍照或扫描上传发票等原始凭证的电子版。</li>
+                        <li>提交审批: 提交报销单，系统将自动流转至直接上级审批。</li>
+                        <li>部门/财务审批: 报销单经由部门负责人、财务部门等依次审批。</li>
+                        <li>纸质凭证移交: 审批通过后，打印报销单，并附上纸质发票，按要求移交至财务部。</li>
+                        <li>打款完成: 财务审核无误后，安排打款至员工指定账户。</li>
+                    </ul>
+                </div>
+            `
+        };
+
+        // --- 加载笔记内容到显示区 ---
+        function loadNote(noteId) {
+            const contentArea = document.getElementById('notes-content-area');
+            const previews = document.querySelectorAll('.note-preview');
+
+            // 移除所有选中的样式
+            previews.forEach(p => p.classList.remove('selected'));
+
+            // 找到被点击的预览并添加选中样式
+            document.querySelector(`.note-preview[onclick="loadNote('${noteId}')"]`).classList.add('selected');
+
+            // 写入内容
+            contentArea.innerHTML = notesData[noteId];
+        }
+
+        // 默认加载第一条笔记
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNote('note2');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业报销审批系统</title>
+    <style>
+        :root {
+            --oa-blue: #3498db;
+            --oa-red: #e74c3c;
+            --oa-background: #ecf0f1;
+            --oa-text: #34495e;
+            --shadow-light: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            background: var(--oa-background);
+            color: var(--oa-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header & Navigation --- */
+        .header {
+            background: #fff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+        }
+        .header h1 {
+            color: var(--oa-blue);
+            font-size: 24px;
+            font-weight: 500;
+            
+        }
+
+        
+        .nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: var(--oa-text);
+            font-size: 14px;
+            padding-bottom: 3px;
+            transition: color 0.2s;
+        }
+        .nav a.active {
+            color: var(--oa-blue);
+            border-bottom: 2px solid var(--oa-blue);
+        }
+
+        /* --- Main Content Area --- */
+        .container {
+            flex-grow: 1;
+            padding: 30px;
+        }
+        .panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel h2 {
+            font-size: 20px;
+            color: var(--oa-text);
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* --- Reimbursement Table --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        th {
+            background: #f7f7f7;
+            font-weight: 600;
+        }
+        tr:hover { background: #fcfcfc; }
+        td span {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        .status-rejected { background: #fef4f4; color: var(--oa-red); border: 1px solid #f9dadc; }
+        .status-approved { background: #e8f8f5; color: #2ecc71; }
+        .status-pending { background: #fcf7e2; color: #f39c12; }
+
+        .rejected-row {
+            cursor: pointer;
+            background: #fff5f5 !important;
+        }
+        .rejected-row:hover {
+             background: #ffebeb !important;
+        }
+
+        /* --- Signature Verification Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            width: 860px;
+            max-height: 90vh;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            color: var(--oa-red);
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .verification-area {
+            background: #1c2833; /* 暗色背景模拟专业分析软件 */
+            padding: 40px;
+            margin-top: 20px;
+            border-radius: 6px;
+            color: white;
+            position: relative;
+            text-align: center;
+        }
+        
+        .comparison-window {
+            width: 90%;
+            height: 200px;
+            border: 2px solid #5d6d7e;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+            background: #0d1721;
+        }
+        
+        .signature-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-family: 'Times New Roman', serif; /* 模拟签名笔迹 */
+            font-weight: 900;
+            opacity: 0.8;
+            letter-spacing: -20px;
+        }
+        
+        .sig-history { color: #5dade2; opacity: 0.6; }
+        .sig-current { color: #f7dc6f; position: absolute; top: 0; left: 0; transform: translate(-50%, -50%); /* 重叠 */ }
+
+        /* --- THE HIDDEN KEY FLAW --- */
+        #key-flaw {
+            position: absolute;
+            top: 110px; /* 定位到签名中间 */
+            left: 48%;
+            width: 10px;
+            height: 10px;
+            background: transparent;
+            font-size: 14px;
+            z-index: 10;
+            color: #f1c40f; /* 突出显示 */
+            animation: pulse 1.5s infinite; /* 模拟闪烁 */
+            border: 2px dashed #f1c40f;
+            line-height: 6px;
+            padding: 2px;
+            opacity: 0; /* 默认隐藏 */
+            transition: opacity 0.5s;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(241, 196, 15, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+        }
+
+        .key-info {
+            background: #2e4053;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: left;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .key-info strong { color: #f1c40f; font-size: 16px; margin-right: 10px; }
+        body {
+            font-family: 'SimSun', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+        }
+        .oa-document {
+            width: 800px;
+            min-height: 950px;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            line-height: 1.6;
+            font-size: 14px;
+            margin: 20px 0;
+            border: 1px dashed #c0392b; /* 强调特批性质 */
+        }
+
+        /* 标题区 */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: bold;
+            color: #c0392b; /* 红色：特批 */
+            border-bottom: 3px double #c0392b;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        .header h2 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .header p {
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* 基础信息表格 */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .info-table th, .info-table td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        .info-table th {
+            width: 18%;
+            background-color: #f0f0f0;
+            font-weight: normal;
+        }
+        .info-table td {
+            width: 32%;
+        }
+
+        /* 报销明细 */
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+        .detail-table th, .detail-table td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .detail-table th {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+        .total-row td {
+            font-weight: bold;
+            text-align: right;
+            background-color: #ffe6e6; /* 强调总金额 */
+        }
+        .total-row td:first-child {
+            text-align: center;
+        }
+
+        /* 审批流程 */
+        .approval-flow {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .approval-flow th, .approval-flow td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: center;
+            height: 60px;
+        }
+        .approval-flow th {
+            width: 10%;
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        /* 签名占位符和日期 */
+        .signature-box {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #1a5276;
+            font-weight: bold;
+        }
+        .signature-date {
+            font-size: 10px;
+            color: #888;
+            margin-top: 2px;
+        }
+        
+        /* 附件区 */
+        .attachment {
+            margin-top: 20px;
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+            font-size: 13px;
+        }
+        .attachment h3 {
+            color: #0b5394;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        /* 模拟行程单样式 */
+        .trip-sheet {
+            border: 1px solid #999;
+            padding: 15px;
+            background-color: #fcfcfc;
+            margin-bottom: 20px;
+        }
+        .trip-sheet h2 {
+            font-size: 18px;
+            text-align: center;
+            margin: 0 0 15px 0;
+            color: #333;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+        .trip-meta {
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .trip-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .trip-table th, .trip-table td {
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: left;
+        }
+        .trip-table th {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ExpenseFlow 报销审批</h1>
+        <div class="nav">
+            <a href="#" class="active">我的待办 (1)</a>
+            <a href="#">费用报销</a>
+            <a href="#">系统配置</a>
+            <a href="#">冯静宜(登出)</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h2>待审批列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">单号</th>
+                        <th style="width: 25%;">报销人</th>
+                        <th style="width: 25%;">报销类型</th>
+                        <th style="width: 15%;">金额 (¥)</th>
+                        <th style="width: 15%;">状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>EXP20251202-001</td>
+                        <td>郑虹</td>
+                        <td>差旅费</td>
+                        <td>4,500.00</td>
+                        <td><span class="status-pending">待审批</span></td>
+                    </tr>
+                    <tr class="rejected-row" onclick="showSignatureAnalysis()">
+                        <td>EXP20251118-015</td>
+                        <td>周子俊</td>
+                        <td>业务招待费（特批）</td>
+                        <td>9,448.00</td>
+                        <td><span class="status-rejected">已通过</span></td>
+                    </tr>
+                    <tr>
+                        <td>EXP20251113-009</td>
+                        <td>钱涛</td>
+                        <td>服务器续费</td>
+                        <td>3,089.50</td>
+                        <td><span class="status-approved">已通过</span></td>
+                    </tr>
+                    <tr>
+                        <td>EXP20251105-004</td>
+                        <td>许思默</td>
+                        <td>采购工具</td>
+                        <td>5,799.00</td>
+                        <td><span class="status-approved">已通过</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="analysisModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeSignatureAnalysis()">×</span>
+            <h3>费用报销单 (招待专项)</h3>
+            <p><strong>单号: EXP20251118-015</strong> | 报销人: 周子俊</p>
+
+<div class="oa-document">
+
+
+        <table class="info-table">
+            <tr>
+                <th>报销人</th>
+                <td>周子俊</td>
+                <th>部门/项目</th>
+                <td>市场部</td>
+            </tr>
+            <tr>
+                <th>事由日期</th>
+                <td>2025-11-13 至 2025-11-14</td>
+                <th>报销类别</th>
+                <td style="color: #c0392b; font-weight: bold;">业务招待费 (特批)</td>
+            </tr>
+            <tr>
+                <th>总金额大写</th>
+                <td colspan="3" style="font-size: 16px; color: #c0392b;">玖仟肆佰肆拾捌元整</td>
+            </tr>
+        </table>
+
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">序号</th>
+                    <th style="width: 40%;">摘要/用途</th>
+                    <th style="width: 15%;">单据张数</th>
+                    <th style="width: 20%;">金额 (RMB)</th>
+                    <th style="width: 20%;">备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>青州国际大酒店餐饮发票</td>
+                    <td>1</td>
+                    <td>8,988.00</td>
+                    <td>晚宴，共6人</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>市内网约车服务提供方行程单</td>
+                    <td>1</td>
+                    <td>460.00</td>
+                    <td>市内交通</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right; padding-right: 10px;">发票总计张数：2张</td>
+                    <td>9,448.00</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="approval-flow">
+            <thead>
+                <tr>
+                    <th>申请人</th>
+                    <th>部门/分管领导</th>
+                    <th>财务审核</th>
+                    <th>最高权限特批</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="signature-box">周子俊 (提交)</div>
+                        <div class="signature-date">2025-11-18</div>
+                    </td>
+                    <td>
+                        <div class="signature-box" style="color: #888;">(快速审批)</div>
+                        <div class="signature-date"></div>
+                    </td>
+                    <td>
+                        <div class="signature-box" style="color: #008000;">冯静宜</div>
+                        <div class="signature-date">2025-11-18</div>
+                    </td>
+                    <td>
+                        <div class="signature-box" style="color: #c0392b;">魏东城 (特批通过)</div>
+                        <div class="signature-date">2025-11-20</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="attachment">
+            <h3>附件区</h3>
+            
+            <div class="trip-sheet">
+                <h2>第三方网约车服务提供方阳光出行—行程单</h2>
+                <div class="trip-meta">
+                    <span>■ 申请日期:2025-11-15</span>
+                    <span>■ 行程起始日期:2025-11-13 至 2025-11-14</span>
+                    <span>■ 行程人手机号:195XXXX02322</span>
+                    <span>■ 共4笔行程,合计 460.00元</span>
+                </div>
+                <table class="trip-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">序号</th>
+                            <th style="width: 10%;">车型</th>
+                            <th style="width: 15%;">上车时间</th>
+                            <th style="width: 10%;">城市</th>
+                            <th style="width: 30%;">起点</th>
+                            <th style="width: 30%;">终点</th>
+                            <th style="width: 10%;">金额 [元]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>阳光快车</td>
+                            <td>11-13 18:30</td>
+                            <td>青州市</td>
+                            <td>臻鼎集团总部大楼</td>
+                            <td>青州国际大酒店</td>
+                            <td>45.00</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>阳光快车</td>
+                            <td>11-13 22:30</td>
+                            <td>青州市</td>
+                            <td>青州国际大酒店</td>
+                            <td>华府小区</td>
+                            <td>75.00</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>阳光快车</td>
+                            <td>11-14 08:00</td>
+                            <td>青州市</td>
+                            <td>华府小区</td>
+                            <td>青州市自然资源规划局</td>
+                            <td>60.00</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>阳光快车</td>
+                            <td>11-14 11:30</td>
+                            <td>青州市</td>
+                            <td>青州市自然资源规划局</td>
+                            <td>青州大学校区附近</td>
+                            <td>280.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="text-align: right; margin-top: 10px; font-weight: bold; font-size: 14px;">合计金额: 460.00元</p>
+            </div>
+            
+        </div>
+
+    </div>
+            
+            <p style="text-align: right; margin-top: 20px; font-size: 12px; color: #777;">*此功能仅限系统安全审计员访问。*</p>
+        </div>
+    </div>
+
+    <script>
+        const analysisModal = document.getElementById('analysisModal');
+        const keyFlaw = document.getElementById('key-flaw');
+
+        function showSignatureAnalysis() {
+            analysisModal.style.display = 'flex';
+            
+            // 延迟显示并触发动画，模拟分析过程
+            setTimeout(() => {
+                keyFlaw.style.opacity = 1;
+            }, 500);
+        }
+
+        function closeSignatureAnalysis() {
+            analysisModal.style.display = 'none';
+            keyFlaw.style.opacity = 0; // 隐藏密钥
+        }
+    </script>
+</body>
+</html>

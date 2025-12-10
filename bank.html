@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青州银行 - 青州银行评选表彰10位“感动青银”员工</title>
+    <style>
+        /* ====================================
+           1. 继承首页基础样式（青色主题）
+           ==================================== */
+        :root {
+            --primary-color: #20b2aa; /* 中等青色/浅海绿色 */
+            --secondary-color: #48d1cc; /* 较亮的青色 */
+            --light-bg-color: #e0ffff; /* 浅淡的青色背景 */
+            --text-color: #333;
+            --white-text: #fff;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5; /* 浅灰色背景 */
+        }
+
+        /* 头部导航条样式 (与首页保持一致) */
+        .header-nav {
+            background-color: #fff;
+            border-bottom: 1px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .header-content {
+            width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        .logo h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 24px;
+        }
+        .main-menu ul { list-style: none; padding: 0; margin: 0; display: flex; }
+        .main-menu li { margin-left: 30px; }
+        .main-menu a { text-decoration: none; color: var(--text-color); font-weight: bold; padding: 5px 0; transition: color 0.3s; }
+        .main-menu a:hover { color: var(--primary-color); }
+        
+        /* ====================================
+           2. 首页横幅样式 (新增并保留)
+           ==================================== */
+        .full-width-banner {
+            width: 100%; /* 占据整个屏幕宽度 */
+            margin-bottom: 10px; /* 与下方内容保持间距 */
+        }
+        .banner {
+            height: 120px; /* 缩短横幅高度以适应详情页 */
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        .banner-text {
+            text-align: center;
+            z-index: 10;
+        }
+        .banner-text h2 {
+            font-size: 30px; /* 标题字号缩小 */
+            color: var(--white-text);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        .banner-text p {
+            font-size: 16px;
+            color: var(--white-text);
+            margin-top: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 3px 15px;
+            border-radius: 3px;
+        }
+        .advertisement {
+            position: absolute;
+            right: 15px;
+            bottom: 5px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 10px;
+        }
+
+
+        /* ====================================
+           3. 新闻详情页布局与内容样式
+           ==================================== */
+        .news-container {
+            width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        /* 新闻主体内容区 */
+        .article-main {
+            flex-grow: 1; 
+            max-width: 900px;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            line-height: 1.8;
+        }
+        
+        /* 侧边栏（快速链接） */
+        .news-sidebar {
+            width: 280px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+        .news-sidebar h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-bg-color);
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+        .news-sidebar ul { list-style: none; padding: 0; }
+        .news-sidebar li { padding: 8px 0; border-bottom: 1px dashed #eee; }
+        .news-sidebar a { text-decoration: none; color: #555; font-size: 14px; }
+        .news-sidebar a:hover { color: var(--primary-color); }
+
+        /* 面包屑导航 */
+        .breadcrumb {
+            width: 1200px;
+            margin: 0 auto 10px auto;
+            font-size: 14px;
+            color: #777;
+        }
+        .breadcrumb a {
+            text-decoration: none;
+            color: var(--primary-color);
+        }
+
+        /* 嵌入内容原有样式微调 */
+        .article-main h1 {
+            color: var(--primary-color); 
+            font-size: 32px;
+            /* ... (其他样式保持不变) */
+        }
+        /* ... (省略了与上次代码相同的嵌入内容样式，以节省篇幅) */
+
+        .award-card {
+            display: flex;
+            align-items: flex-start;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #f1f1f1;
+            border-radius: 8px;
+            background-color: #fffaf0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .award-icon {
+            font-size: 40px;
+            margin-right: 20px;
+            color: #f39c12;
+        }
+        .award-content h3 {
+            color: var(--primary-color); 
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 1px dashed #f39c12;
+            padding-bottom: 5px;
+        }
+        
+        .quote {
+            background-color: var(--light-bg-color);
+            border-left: 4px solid var(--primary-color); 
+            padding: 15px;
+            margin: 30px 0;
+            font-style: italic;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .image-placeholder {
+            text-align: center;
+            margin: 25px 0;
+            border: 1px dashed #ccc;
+            padding: 20px 0;
+            background-color: #fcfcfc;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .article-footer {
+            text-align: center; 
+            margin-top: 30px; 
+            padding: 15px; 
+            background-color: #f7f7f7; 
+            border-radius: 8px;
+        }
+        .article-footer p {
+            font-weight: bold; 
+            color: var(--primary-color);
+            margin: 5px 0;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <header class="header-nav">
+        <div class="header-content">
+            <div class="logo">
+                <h1>青州银行</h1>
+            </div>
+            <nav class="main-menu">
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="#">个人业务</a></li>
+                    <li><a href="#">企业业务</a></li>
+                    <li><a href="#">关于银行</a></li>
+                    <li><a href="#">客户服务</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="full-width-banner">
+        <div class="banner">
+            <div class="banner-text">
+                <h2>青州银行服务指南</h2>
+                <p>超实用！重点功能贴心攻略</p>
+            </div>
+            <span class="advertisement">广告</span>
+        </div>
+    </div>
+    <div class="breadcrumb">
+        <a href="index.html">首页</a> &gt; <a href="#">银行动态</a> &gt; 正文
+    </div>
+
+    <div class="news-container">
+
+        <aside class="news-sidebar">
+            <h3>最新银行动态</h3>
+            <ul>
+                <li><a href="#">青州银行推出"青心贷"服务</a></li>
+                <li><a href="#">总行举办安全应急演练</a></li>
+                <li><a href="#">【公告】系统升级通知</a></li>
+                <li><a href="#">年度财报：稳健增长</a></li>
+            </ul>
+            <div style="margin-top: 20px;">
+                <h3>相关业务推荐</h3>
+                <a href="#"><img src="placeholder_ad.jpg" alt="理财广告" style="width: 100%; border: 1px solid #ccc; margin-top: 10px;"></a>
+            </div>
+        </aside>
+
+        <main class="article-main">
+            
+            <div class="header">
+                <h1>青州银行评选表彰10位“感动青银”员工</h1>
+            </div>
+            <div class="article-meta">
+                <span>来源：青州银行企业文化部</span>
+                <span>发布日期：2015年5月10日</span>
+            </div>
+            
+            <div class="image-placeholder">
+                
+            </div>
+
+            <p>近日，青州银行2015半年度“感动青银”员工颁奖典礼在总行隆重举行。此次评选活动是为表彰基层员工的感人事迹、推进企业文化建设的一项重要举措，旨在发现并弘扬那些在平凡岗位上做出不平凡贡献的优秀代表。</p>
+
+            <p>评选委员会本着公平公正的原则，严格按照推选标准，牢牢把握“感动”与“卓越”两大要素，经过层层选拔和全行员工网上投票，最终评选出十位首届“感动青银”荣誉获得者。</p>
+
+            <h2>荣光背后的故事：三位模范代表</h2>
+
+            <p>在获此殊荣的优秀员工中，有三位来自不同岗位的代表，他们的事迹深深感动、鼓舞和震撼了每一位青银员工：</p>
+
+            <div class="award-card">
+                <div class="award-content">
+                    <h3>【业绩先锋】程心悦：专业铸就卓越</h3>
+                    <p><strong>职位：</strong> 零售金融部资深客户经理</p>
+                    <p>程心悦同志是青州银行零售金融领域的旗帜性人物。她以“顾全大局、心系青银”的敬业精神，在复杂的市场环境中展现出超强的专业能力和客户维护能力。</p>
+                    <p>她的业绩连续三年保持同岗位第一，她不仅是业务的标兵，更以其前瞻性的市场洞察力，为银行带来了多个创新合作项目。她的忘我工作、任劳任怨，是当代青银人勤奋好学、善于钻研的典范。</p>
+                </div>
+            </div>
+
+            <div class="award-card">
+                <div class="award-content">
+                    <h3>【新风楷模】高芸：恪守职业底线</h3>
+                    <p><strong>职位：</strong> 星火支行大堂经理</p>
+                    <p>高芸同志的事迹亲切真实。她在日常工作中，在大堂柜面拾获客户遗失的巨额无记名定期存单。面对诱惑，她恪尽职守，第一时间上报并归还客户。她对客户的财产安全负责到底，以实际行动诠释了“不辱使命的负责精神”。</p>
+                    <p>高芸同志的事迹，是倡导新风的模范，她的职业道德和高尚品格，体现了青银员工情牵客户的朴素情怀。</p>
+                </div>
+            </div>
+            <div class="award-card">
+                <div class="award-content">
+                    <h3>【创新引领】刘嘉豪：助力服务升级</h3>
+                    <p><strong>职位：</strong> 数字化转型部产品经理</p>
+                    <p>刘嘉豪同志致力于银行数字化服务创新。他主导开发的“智慧客户管理系统”，大幅提升了客户服务效率和满意度。面对业务复杂性，他总能用技术手段优化流程，体现了卓越的创新能力与执行力。</p>
+                    <p>在过去一年，他推动的数字化项目成功落地，帮助多家支行实现线上业务闭环。他的前瞻思维和对客户体验的执着追求，使他成为银行内部青年员工学习的榜样。</p>
+                </div>
+            </div>
+            <h2>董事长致辞：传承感动，再创辉煌</h2>
+
+            <p>在颁奖典礼上，青州银行董事长姜栋华在致辞中指出，青州银行成立以来，涌现出了无数品德高尚、事迹感人的优秀员工和先进典型。此次受到表彰的员工，正是全行员工队伍的优秀代表。</p>
+
+            <div class="quote">
+                “他们的事迹，集中体现了当代青银人的精神风貌。我希望全体员工，将这份感动转化为实实在在的行动，以自己的热情、智慧和力量谱写新的历史篇章，在全面建设国际一流现代金融企业的征途上创造更多的辉煌。”
+            </div>
+
+            <p>在近两个小时的颁奖典礼中，会场不时响起阵阵热烈的掌声，许多员工被那些感人至深的故事所触动。青州银行将继续以这些模范为榜样，激发全行员工的拼搏精神和奉献精神。</p>
+
+            <div class="image-placeholder">
+                
+            </div>
+
+            <div class="article-footer">
+                <p>致敬所有奋斗者！青州银行因你们而骄傲！</p>
+                <p style="font-size: 12px; color: #888;">#感动青银 #企业文化 #卓越与奉献</p>
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

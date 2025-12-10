@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYS_EXPORT_20251130_113045_478.xlsx</title>
+    <style>
+        :root {
+            /* macOS Theme Colors */
+            --mac-bg: #f0f0f0;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+            
+            /* Excel Theme Colors */
+            --excel-green: #217346; /* Excel 经典绿色 */
+            --excel-border: #d0d0d0;
+            --sheet-tab-bg: #f5f5f5;
+            --active-tab-bg: #ffffff;
+            --excel-text: #333;
+            --error-red: #c0392b;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; 
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            /* 保持 macOS 风格背景 */
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: flex; /* 确保内容居中 */
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-left .app-name { color: var(--excel-green); }
+        .menubar-right span { margin-left: 15px; }
+
+        /* --- 文件访问权限模态框 (保留第一层加密) --- */
+        .file-access-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* 确保在所有内容之上 */
+        }
+        .access-modal-content {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 400px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .access-modal-content h3 {
+            color: var(--excel-green);
+            margin-bottom: 10px;
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .access-modal-content h3 i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .access-modal-content p {
+            color: var(--excel-text);
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+        .access-modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .access-modal-content input:focus {
+            border-color: var(--excel-green);
+            outline: none;
+        }
+        .access-modal-content button {
+            padding: 12px 30px;
+            background-color: var(--excel-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .access-modal-content button:hover {
+            background-color: #1a5a3a;
+        }
+        .access-error-message {
+            color: var(--error-red);
+            margin-top: 15px;
+            font-size: 0.9em;
+            height: 18px; /* 预留空间避免跳动 */
+            display: block;
+        }
+
+
+        /* --- Excel Application Window (主体) --- */
+        .excel-app {
+            width: 90%;
+            max-width: 1200px;
+            height: 700px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative; 
+            z-index: 500;  
+            /* 默认状态：模糊且不可交互 */
+            filter: blur(5px);
+            opacity: 0.3;
+            pointer-events: none;
+            transition: filter 0.5s, opacity 0.5s;
+        }
+        /* 解锁状态 */
+        .excel-app.unlocked {
+            filter: blur(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+
+        /* App Header (标题栏 - macOS风格) */
+        .app-header {
+            height: 40px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .app-title { font-size: 14px; font-weight: 500; color: #333; margin-left: 10px; }
+
+        /* --- Excel 工具栏 (Ribbon - 简化) --- */
+        .excel-ribbon {
+            background-color: #f8f8f8;
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--excel-border);
+        }
+        .excel-ribbon button {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-right: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--excel-text);
+        }
+        .excel-ribbon .active-btn {
+            background-color: var(--excel-green);
+            color: white;
+            border-color: var(--excel-green);
+        }
+
+        /* --- 表格区域 (核心) --- */
+        .grid-area {
+            flex-grow: 1;
+            overflow: auto;
+            border-bottom: 1px solid var(--excel-border);
+        }
+        /* 真实 Excel 表格样式 */
+        table.spreadsheet {
+            width: 100%;
+            min-width: 1000px; 
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .spreadsheet th, .spreadsheet td {
+            border: 1px solid var(--excel-border);
+            padding: 5px 8px;
+            min-width: 60px;
+            height: 25px;
+            white-space: nowrap;
+        }
+        .spreadsheet th {
+            background-color: #e8e8e8;
+            font-weight: 400;
+            text-align: center;
+            color: #666;
+            padding: 3px 5px;
+        }
+        /* 行号和列号 */
+        .spreadsheet tr:first-child th:not(:empty) {
+            background-color: #d0d0d0;
+            color: var(--excel-text);
+        }
+        .spreadsheet tr th:first-child {
+            background-color: #e8e8e8;
+            text-align: right;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* --- Sheet 标签区域 --- */
+        .sheet-tabs {
+            height: 35px;
+            background-color: var(--sheet-tab-bg);
+            display: flex;
+            align-items: flex-end;
+            padding-left: 10px;
+        }
+        .sheet-tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: 1px solid var(--excel-border);
+            border-bottom: none;
+            background-color: var(--sheet-tab-bg);
+            margin-right: 2px;
+            border-radius: 4px 4px 0 0;
+            transition: background-color 0.2s;
+            font-size: 0.9em;
+        }
+        .sheet-tab.active {
+            background-color: var(--active-tab-bg);
+            font-weight: 600;
+            border-top: 3px solid var(--excel-green);
+            padding-top: 5px;
+        }
+        /* 移除加密标签的特殊样式，因为现在它不加密了 */
+        .sheet-tab.encrypted {
+             color: var(--excel-text); 
+        }
+        .sheet-tab i {
+            margin-right: 5px;
+            /* 保持锁图标，但改为灰色或删除，这里我保留了图标但去掉了红色 */
+            color: #666; 
+        }
+         /* 覆盖全局层，最顶层浮层 */
+    .suspense-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: black;
+        opacity: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 3000;
+        pointer-events: none;
+        transition: opacity 3s ease-in;
+    }
+
+    .suspense-overlay.active {
+        opacity: 1;
+    }
+
+    .suspense-text {
+        color: #c0392b;
+        font-size: 4em;
+        font-weight: bold;
+        font-family: "Impact", "Arial Black", sans-serif;
+        text-shadow: 2px 2px 4px #000;
+        opacity: 0;
+        animation: fadeInText 2s forwards 3s; /* 3秒后淡入 */
+        text-align: center;
+    }
+
+    @keyframes fadeInText {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>Excel</span>
+            <span>文件</span>
+            <span>编辑</span>
+            <span>插入</span>
+            <span>公式</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日</span>
+        </div>
+    </div>
+    
+    <div class="file-access-modal" id="fileAccessModal">
+        <div class="access-modal-content">
+            <h3><i class="fas fa-file-shield"></i> 文件访问受限</h3>
+            <p>该文件包含敏感财务数据，请验证【法人姓名】及【银行账户后4位】以解锁访问。</p>
+            <input type="text" id="accessNameInput" placeholder="请输入法人姓名" required>
+            <input type="password" id="accessCardInput" placeholder="请输入银行账户后4位" maxlength="4" required>
+            <button onclick="checkFileAccess()">确 认 访 问</button>
+            <span class="access-error-message" id="accessErrorMessage"></span>
+        </div>
+    </div>
+
+
+    <div class="excel-app" id="excelApp">
+        
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="app-title">SYS_EXPORT_20251130_113045_478.xlsx - Microsoft Excel</div>
+        </div>
+
+        <div class="excel-ribbon">
+            <button class="active-btn"><i class="fas fa-home"></i> 开始</button>
+            <button><i class="fas fa-table"></i> 插入</button>
+            <button><i class="fas fa-divide"></i> 公式</button>
+            <button><i class="fas fa-filter"></i> 数据</button>
+            <button><i class="fas fa-lock"></i> 审阅</button>
+        </div>
+        
+        <div class="grid-area">
+            <table class="spreadsheet" id="spreadsheet-data">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                        <th>F</th>
+                        <th>G</th>
+                        <th>H</th>
+                        <th>I</th>
+                        <th>J</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="sheet-tabs">
+            <div class="sheet-tab encrypted" data-sheet-name="长垣发展有限公司" onclick="switchSheet('长垣发展有限公司')">
+                <i class="fas fa-key"></i> 长垣发展有限公司 </div>
+            <div class="sheet-tab" data-sheet-name="90天流水明细" onclick="switchSheet('90天流水明细')">90天流水明细</div>
+        </div>
+    </div>
+
+    <div class="mac-dock">
+        <div class="dock-icon" style="background: #e67e22;"><i class="fas fa-folder-open" style="color:#fff;"></i></div>
+        <div class="dock-icon" style="background: var(--excel-green);"><i class="fas fa-file-excel" style="color:#fff;"></i></div>
+        <div class="dock-icon" style="background: #3498db;"><i class="fab fa-safari" style="color:#fff;"></i></div>
+    </div>
+
+    <script>
+        // 关键解密信息 (保持不变)
+        const CORRECT_NAME = "程心悦";
+        const CORRECT_CARD_LAST_FOUR = "3671"; 
+
+        // 元素引用
+        const excelApp = document.getElementById('excelApp');
+        const fileAccessModal = document.getElementById('fileAccessModal');
+        const accessNameInput = document.getElementById('accessNameInput');
+        const accessCardInput = document.getElementById('accessCardInput');
+        const accessErrorMessage = document.getElementById('accessErrorMessage');
+
+        const spreadsheetData = document.getElementById('spreadsheet-data');
+        const tabs = document.querySelectorAll('.sheet-tab');
+
+
+        // --- 1. 文件访问权限验证 (第一层加密逻辑：保留) ---
+        function checkFileAccess() {
+            const name = accessNameInput.value.trim();
+            const card = accessCardInput.value.trim();
+
+            if (name === CORRECT_NAME && card === CORRECT_CARD_LAST_FOUR) {
+                // 验证成功
+                accessErrorMessage.textContent = "";
+                fileAccessModal.style.display = 'none'; // 隐藏权限模态框
+                excelApp.classList.add('unlocked'); // 解锁 Excel 样式
+                switchSheet('长垣发展有限公司'); // 成功解锁后，默认加载第一个 Sheet 的数据
+            } else {
+                // 验证失败
+                accessErrorMessage.textContent = "姓名或卡号后4位不正确。";
+                // 摇晃效果 (可选)
+                fileAccessModal.querySelector('.access-modal-content').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(0)' }
+                ], {
+                    duration: 300,
+                    easing: 'ease-in-out'
+                });
+            }
+        }
+        
+        // 确保一开始显示模态框
+        document.addEventListener('DOMContentLoaded', () => {
+             fileAccessModal.style.display = 'flex';
+        });
+
+        // 绑定回车事件
+        accessNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkFileAccess();
+            }
+        });
+        accessCardInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkFileAccess();
+            }
+        });
+
+
+        // --- 2. Sheet 切换逻辑 (第二层加密：已删除，改为直接切换) ---
+        function switchSheet(sheetName) {
+            // 激活 Sheet 标签
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`[data-sheet-name="${sheetName}"]`).classList.add('active');
+
+            // 模拟切换表格数据
+            updateTableContent(sheetName);
+        }
+
+        function updateTableContent(sheetName) {
+            const tbody = spreadsheetData.querySelector('tbody');
+                    
+        if (sheetName === '长垣发展有限公司') {
+            tbody.innerHTML = `
+                <tr>
+                    <th>1</th>
+                    <td>主体编号</td>
+                    <td>主体名称</td>
+                    <td>注册日期</td>
+                    <td>法定代表人</td>
+                    <td>统一社会信用代码</td>
+                    <td>注册资本(RMB)</td>
+                    <td>登记状态</td>
+                    <td>开户银行</td>
+                    <td>对公账户号</td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <th>2</th>
+                    <td>CY-DEV-2019</td>
+                    <td>长垣发展有限公司</td>
+                    <td>2019-05-20</td>
+                    <td>程心悦</td>
+                    <td>9137XXXXXXXXXXXX</td>
+                    <td>10,000,000.00</td>
+                    <td>存续</td>
+                    <td>青州银行营业部</td>
+                    <td>6228 **** **** 3671</td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <th>3</th>
+                    <td></td>
+                    <td>经营范围</td>
+                    <td colspan="6">城市基础设施建设、土地储备整理、项目资金代管服务</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <th>4</th>
+                    <td></td>
+                    <td>关联单位</td>
+                    <td>青苗计划公益基金</td>
+                    <td>臻鼎集团</td>
+                    <td>城市微循环发展基金会</td>
+                    <td>奖助学金专项账户</td>
+                    <td colspan="2"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+
+                <tr>
+                    <th>5</th>
+                    <td></td>
+                    <td>实际经办人记录</td>
+                    <td colspan="6">高芸</td>
+                    <td></td>
+                    <td>内部通讯录记录</td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <th>6</th>
+                    <td></td>
+                    <td>对公账户交易对手</td>
+                    <td>青苗计划公益基金</td>
+                    <td>臻鼎集团专项账户</td>
+                    <td>城市微循环发展基金会</td>
+                    <td>青州银行个人账户</td>
+                    <td colspan="2"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <th>7</th>
+                    <td></td>
+                    <td>账户备案信息</td>
+                    <td colspan="6">对公账户授权经办人：高芸</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <th>8</th>
+                    <td></td>
+                    <td>资料存档编号</td>
+                    <td colspan="6">ARCH-CY-2025-09</td>
+                    <td>存档时间</td>
+                    <td>2025-09-30</td>
+                    <td></td>
+                </tr>
+            `;
+
+
+            }else {
+                tbody.innerHTML = `
+                    <tr>
+                        <th>1</th>
+                        <td>流水编号</td>
+                        <td>交易时间</td>
+                        <td>付款方</td>
+                        <td>付款账户</td>
+                        <td>收款方</td>
+                        <td>收款账户</td>
+                        <td>金额(RMB)</td>
+                        <td>交易方式</td>
+                        <td>业务类型</td>
+                        <td></td>
+                    </tr>
+
+<tr>
+    <th>2</th>
+    <td>JL-2025-0903</td>
+    <td>2025-09-03 09:18</td>
+    <td>长垣发展有限公司</td>
+    <td>对公账户</td>
+    <td>青源数字科技有限公司</td>
+    <td>对公账户</td>
+    <td>2,400,000.00</td>
+    <td>转账</td>
+    <td>技术服务费</td>
+    <td></td>
+</tr>
+
+<tr>
+    <th>3</th>
+    <td>JL-2025-0908</td>
+    <td>2025-09-08 14:52</td>
+    <td>长垣发展有限公司</td>
+    <td>对公账户</td>
+    <td>程心悦</td>
+    <td>个人账户</td>
+    <td>1,200,000.00</td>
+    <td>转账</td>
+    <td>资金划转</td>
+    <td></td>
+</tr>
+
+
+<tr>
+    <th>4</th>
+    <td>JL-2025-1005</td>
+    <td>2025-10-05 16:11</td>
+    <td>臻鼎集团专项账户</td>
+    <td>对公账户</td>
+    <td>长垣发展有限公司</td>
+    <td>对公账户</td>
+    <td>2,800,000.00</td>
+    <td>转账</td>
+    <td>项目合作款</td>
+    <td></td>
+</tr>
+
+<tr>
+    <th>6</th>
+    <td>JL-2025-1012</td>
+    <td>2025-10-12 11:27</td>
+    <td>长垣发展有限公司</td>
+    <td>对公账户</td>
+    <td>青源数字科技有限公司</td>
+    <td>对公账户</td>
+    <td>780,000.00</td>
+    <td>转账</td>
+    <td>技术顾问费</td>
+    <td></td>
+</tr>
+
+<tr>
+    <th>7</th>
+    <td>JL-2025-1023</td>
+    <td>2025-10-23 19:04</td>
+    <td>青鼎创投基金</td>
+    <td>基金托管账户</td>
+    <td>长垣发展有限公司</td>
+    <td>对公账户</td>
+    <td>4,200,000.00</td>
+    <td>划拨</td>
+    <td>项目投资款</td>
+    <td></td>
+</tr>
+
+<tr>
+    <th>8</th>
+    <td>JL-2025-1102</td>
+    <td>2025-11-02 09:43</td>
+    <td>长垣发展有限公司</td>
+    <td>对公账户</td>
+    <td>青源数字科技有限公司</td>
+    <td>对公账户</td>
+    <td>1,600,000.00</td>
+    <td>转账</td>
+    <td>平台服务费</td>
+    <td></td>
+</tr>
+
+<tr>
+    <th>9</th>
+    <td>JL-2025-1110</td>
+    <td>2025-11-10 15:36</td>
+    <td>长垣发展有限公司</td>
+    <td>对公账户</td>
+    <td>程心悦</td>
+    <td>个人账户</td>
+    <td>1,500,000.00</td>
+    <td>转账</td>
+    <td>项目咨询费</td>
+    <td></td>
+</tr>
+
+                `;
+            }
+
+        }
+        // 确保在 Excel 未解锁时不执行初始 Sheet 切换，留给 checkFileAccess() 执行
+        // switchSheet('长垣发展有限公司'); 
+    </script>
+    <div class="suspense-overlay" id="suspenseOverlay">
+    <div class="suspense-text">你已找到许思默的失踪真相</div>
+</div>
+
+<script>
+    // 当 Excel 解锁后开始计时
+    function startSuspenseTimer() {
+        // 5秒后触发页面渐暗
+        setTimeout(() => {
+            const overlay = document.getElementById('suspenseOverlay');
+            overlay.classList.add('active'); // 逐渐变暗
+        }, 5000); // 5秒
+    }
+
+    // 修改 checkFileAccess 函数，解锁后启动悬疑倒计时
+    function checkFileAccess() {
+        const name = accessNameInput.value.trim();
+        const card = accessCardInput.value.trim();
+
+        if (name === CORRECT_NAME && card === CORRECT_CARD_LAST_FOUR) {
+            accessErrorMessage.textContent = "";
+            fileAccessModal.style.display = 'none';
+            excelApp.classList.add('unlocked');
+            switchSheet('长垣发展有限公司');
+            // 开启悬疑倒计时
+            startSuspenseTimer();
+        } else {
+            accessErrorMessage.textContent = "姓名或卡号后4位不正确。";
+            fileAccessModal.querySelector('.access-modal-content').animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' },
+                { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' },
+                { transform: 'translateX(0)' }
+            ], {
+                duration: 300,
+                easing: 'ease-in-out'
+            });
+        }
+    }
+</script>
+</body>
+</html>

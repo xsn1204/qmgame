@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青州大学工商管理硕士学位证书</title>
+    <style>
+        body {
+            font-family: 'SimSun', 'KaiTi', 'STSong', 'Arial', sans-serif; /* 传统证书常用字体 */
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .certificate-container {
+            width: 900px;
+            height: 600px; /* 模拟证书的横向比例 */
+            background-color: #fff9f0; /* 略带米黄色的底色 */
+            border: 10px solid #c0392b; /* 红色边框 */
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            padding: 40px 60px;
+            position: relative;
+            text-align: center;
+        }
+
+        /* 证书标题 */
+        .title-block {
+            margin-bottom: 30px;
+        }
+        .title-block h1 {
+            font-family: 'SimHei', sans-serif;
+            font-size: 36px;
+            color: #c0392b; /* 证书标题红 */
+            margin-bottom: 5px;
+            letter-spacing: 5px;
+        }
+        .title-block h2 {
+            font-family: 'KaiTi', serif;
+            font-size: 24px;
+            color: #333;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        /* 证书编号和正文 */
+        .content {
+            font-size: 18px;
+            line-height: 2.5;
+            text-align: justify;
+            text-indent: 36px; /* 中文首行缩进 */
+            padding: 0 40px;
+        }
+
+        /* 姓名和学位信息强调 */
+        .name-highlight {
+            font-family: 'KaiTi', serif;
+            font-size: 26px;
+            font-weight: bold;
+            color: #c0392b;
+            padding: 0 10px;
+            border-bottom: 2px dashed #ccc;
+            display: inline-block;
+        }
+        .degree-highlight {
+            font-family: 'SimHei', sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            color: #0b5394;
+        }
+
+        /* 颁发信息和印章 */
+        .footer-block {
+            position: absolute;
+            bottom: 60px;
+            right: 80px;
+            text-align: right;
+        }
+        .footer-block p {
+            font-size: 16px;
+            line-height: 1.8;
+            margin: 0;
+        }
+        .signature {
+            margin-top: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .seal {
+            position: absolute;
+            right: 120px;
+            bottom: 120px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 6px double #cc0000;
+            color: #cc0000;
+            font-weight: bold;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.8;
+            transform: rotate(-10deg);
+            z-index: 10;
+        }
+        .seal-text {
+            line-height: 1.1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="certificate-container">
+
+        <div class="title-block">
+            <h1 style="color: #0b5394;">中华人民共和国学位证书</h1>
+            <h2>青州大学</h2>
+        </div>
+        
+        <div class="seal">
+            <div class="seal-text">学位<br>委员会</div>
+        </div>
+
+        <div class="content">
+            <p>
+                青州大学学位评定委员会根据《中华人民共和国学位条例》的规定，经审核通过，决定授予 <span class="name-highlight">魏东城</span> 同志 <span class="degree-highlight">工商管理硕士</span> 学位。
+            </p>
+            <p>
+                该同志于 2013 年 9 月至 2015 年 7 月在我校工商管理学院在职学习，完成工商管理硕士（MBA）专业培养方案规定的全部课程和学位论文，考核成绩合格。
+            </p>
+            <p>
+                特发此证。
+            </p>
+        </div>
+
+        <div class="footer-block">
+            <p>主 席：吴岭安</p>
+            <p>青州大学学位评定委员会</p>
+            <p>证书编号：QZDX-MBA-2015-03241</p>
+            <p style="margin-top: 15px; font-weight: bold;">二〇一五年 七月 三十日</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

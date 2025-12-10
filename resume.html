@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>-江奕云简历</title>
+    <style>
+        :root {
+            --mac-bg: #f0f0f0;
+            --shadow-window: 0 25px 60px rgba(0,0,0,0.4);
+            --wps-blue: #2A64E3; /* 简历主题色 */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            /* 沿用上次的 macOS 风格背景 */
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* --- macOS Top Bar --- */
+        .mac-menubar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 28px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 13px; color: #333; z-index: 1000;
+        }
+        .menubar-left span { margin-right: 15px; font-weight: 600; }
+        .menubar-right span { margin-left: 15px; }
+
+        /* --- Document Viewer Window (WPS Style) --- */
+        .doc-viewer {
+            width: 850px;
+            height: 680px;
+            background: var(--mac-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-window);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .viewer-header {
+            height: 45px;
+            background: var(--mac-bg);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .viewer-title { font-size: 14px; font-weight: 500; color: #333; flex-grow: 1; text-align: center; margin-right: 60px; }
+
+        /* --- Resume Page Content --- */
+        .viewer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+            background: #e9e9e9;
+        }
+        .a4-page {
+            width: 794px;
+            min-height: 1123px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 40px 60px;
+            line-height: 1.5;
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Resume Styling */
+        .resume-header {
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--wps-blue);
+            margin-bottom: 20px;
+        }
+        .resume-header h1 {
+            font-size: 30px;
+            color: var(--wps-blue);
+            margin-bottom: 5px;
+            font-weight: 800;
+        }
+        .contact-info {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--wps-blue);
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        .list-item {
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid var(--wps-blue);
+        }
+        .item-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .item-subtitle {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .detail-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .detail-list li {
+            position: relative;
+            padding-left: 15px;
+            margin-bottom: 5px;
+        }
+        .detail-list li::before {
+            content: "•";
+            color: var(--wps-blue);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .skill-tag {
+            background: #f0f8ff;
+            color: var(--wps-blue);
+            border: 1px solid var(--wps-blue);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mac-menubar">
+        <div class="menubar-left">
+            <span></span>
+            <span>WPS</span>
+            <span>文件</span>
+            <span>视图</span>
+            <span>审阅</span>
+        </div>
+        <div class="menubar-right">
+            <span>100%</span>
+            <span>Wi-Fi</span>
+            <span>12月4日 周四</span>
+        </div>
+    </div>
+
+    <div class="doc-viewer">
+        <div class="viewer-header">
+            <div class="window-controls">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="viewer-title">产品实习生简历_江奕云.docx</div>
+        </div>
+
+        <div class="viewer-content">
+            <div class="a4-page">
+                
+                <div class="resume-header">
+                    <h1>江奕云</h1>
+                    <div class="contact-info">
+                        求职意向：产品经理实习生 | 手机：138 XXXX 5878 | 邮箱：938XXXX023@qq.com | 城市：青州
+                    </div>
+                </div>
+
+                <div class="section-title">教育背景</div>
+                <div class="list-item">
+                    <div class="item-title">
+                        <span>青州大学 - 软件工程 (大二在读)</span>
+                        <span>2023.09 - 至今</span>
+                    </div>
+                    <div class="item-subtitle">
+                        主修课程：数据结构与算法、面向对象设计、软件工程导论<br>
+                        GPA：3.8/4.0 | 曾获：校级优秀学生奖学金
+                    </div>
+                </div>
+                
+                <div class="section-title">荣誉奖项</div>
+                <div class="list-item">
+                    <div class="item-title">
+                        <span>“卓越之星”科技创新竞赛 - 一等奖</span>
+                        <span>2024.11</span>
+                    </div>
+                    <div class="item-subtitle">
+                        奖项说明：基于校园互助平台项目，因其用户增长速度和技术实现难度受到评委团高度评价。
+                    </div>
+                </div>
+                <div class="section-title">项目经验</div>
+                <div class="list-item">
+                    <div class="item-title">
+                        <span>基于微信小程序的“校园互助平台”</span>
+                        <span>2024.09 - 2024.11</span>
+                    </div>
+                    <div class="item-subtitle">
+                        角色：产品负责人 (3人团队)
+                    </div>
+                    <ul class="detail-list">
+                        <li>通过问卷调研和访谈，确定用户核心痛点为“二手书交易”和“失物招领”的效率低下。</li>
+                        <li>独立完成了产品需求文档(PRD)的撰写，并通过Axure绘制了完整的小程序高保真原型。</li>
+                        <li>负责推动技术实现，协调前端与后端开发进度，在两个月内完成 MVP 版本并成功在校内试运营，积累了 500+ 初始用户。</li>
+                    </ul>
+                </div>
+                
+                <div class="list-item">
+                    <div class="item-title">
+                        <span>大学生“碎片时间管理”App竞品分析</span>
+                        <span>2024.05 - 2024.06</span>
+                    </div>
+                    <div class="item-subtitle">
+                        角色：市场调研与分析师
+                    </div>
+                    <ul class="detail-list">
+                        <li>选取了番茄钟、清单管理等3款主流App进行深度体验，整理了功能模块对比矩阵。</li>
+                        <li>输出了竞品分析报告，提出了针对国内用户习惯的差异化改进建议（如加入“学习小组”社交功能）。</li>
+                    </ul>
+                </div>
+
+                <div class="section-title">专业技能与工具</div>
+                <div class="skills-list">
+                    <span class="skill-tag">原型设计：Axure (熟练) / Figma (了解)</span>
+                    <span class="skill-tag">文档撰写：PRD / MRD (熟练) / WPS Office</span>
+                    <span class="skill-tag">数据分析：Excel (数据透视表) / SQL (入门)</span>
+                    <span class="skill-tag">设计基础：Photoshop (基础修图) / 用户画像</span>
+                    <span class="skill-tag">编程语言：Python / C++ (掌握基础逻辑)</span>
+                </div>
+                
+                <div class="section-title">自我评价</div>
+                <div style="font-size: 13px; color: #555;">
+                    <ul class="detail-list">
+                        <li>具备高度的求知欲和学习能力，能快速理解和适应新的产品领域和工具。</li>
+                        <li>逻辑思维清晰，善于结构化表达和书面文档输出，沟通协调能力强。</li>
+                        <li>作为大二学生，希望通过实习将理论知识应用于实践，并在贵公司积累实战经验。</li>
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
