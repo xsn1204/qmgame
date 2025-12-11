@@ -468,10 +468,10 @@ function searchSpotlight() {
     }
 
     // --- 记录搜索关键词到 Google Sheet ---
-    fetch("https://script.google.com/macros/s/AKfycbxfADNU9fLyUaBn_6Ne0nlsvCrsngZr_TxVxm1oy8UY3y2hUskxwttudyufIh_LfFQlIA/exec", {   // 替换成你的 Apps Script Web App URL
+    fetch("https://script.google.com/macros/s/AKfycbw2YW2wCu3_dl7j-ynmDLxHWil6CUUJxyB-mR_O9LJxsv5l_cX0tPbLbAZ7oH34ZAr-/exec", {   // 替换成你的 Apps Script Web App URL
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ keyword: keyword })
+            body: JSON.stringify({ keyword: query })
         })
         .then(res => res.json())
         .then(data => console.log("记录成功:", data))
