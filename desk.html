@@ -555,14 +555,6 @@ function searchSpotlight() {
             }
         });
 
-        function recordKeyword(keyword) {
-    const script = document.createElement('script');
-    script.src = 'https://script.google.com/macros/s/AKfycbznF4ImtX5wdB0U5TjEd7G1flZb-iOo6-cJwayAKXMJFI3pqRkwZ8Y5ElDbwfKInt55nA/exec?keyword=' + encodeURIComponent(keyword) + '&callback=handleResponse';
-    document.body.appendChild(script);
-    }
-    function handleResponse(data) {
-    console.log('记录成功:', data);
-    }
     </script>
 
 </body>
