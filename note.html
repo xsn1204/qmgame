@@ -216,6 +216,44 @@
     font-size: 0.85rem;
     z-index: 9999;
 }
+      
+      /* === 周报正文排版优化 === */
+.note-detail {
+    font-size: 14px;
+    color: #2c2c2c;
+}
+
+.note-detail h2 {
+    font-size: 24px;
+    margin-bottom: 14px;   /* 原来偏大，略收紧 */
+    line-height: 1.3;
+}
+
+.note-detail p {
+    margin: 0 0 10px 0;    /* 统一段落节奏 */
+    line-height: 1.75;    /* 周报/备忘录的舒适行距 */
+}
+
+.note-detail p + p {
+    margin-top: 4px;      /* 连续段落不要断太狠 */
+}
+
+.note-detail ul {
+    margin: 6px 0 14px 20px; /* 和上下文拉开，但不突兀 */
+    padding: 0;
+}
+
+.note-detail li {
+    margin-bottom: 6px;
+    line-height: 1.65;
+}
+
+/* 时间那一行：更像系统注释 */
+.note-detail p[style*="italic"] {
+    margin-bottom: 14px;
+    font-size: 12.5px;
+}
+
     </style>
 </head>
 <body>
