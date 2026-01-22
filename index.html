@@ -130,6 +130,9 @@
             height: 100%;
             object-fit: cover;
         }
+        #busuanzi_container_site_pv {
+            display: none !important;
+        }
     </style>
 </head>
 
@@ -165,11 +168,44 @@
         <img src="images/signature.jpg" alt="关键签名">
     </div>
 
+    <span id="busuanzi_container_site_pv">
+        PV: <span id="busuanzi_value_site_pv"></span>
+    </span>
+
     <script>
         document.getElementById('loginBtn').addEventListener('click', () => {
             window.location.href = 'desk.html';
         });
+
+        // 4. 增强版统计监控逻辑
+        (function() {
+            const targetNode = document.getElementById('busuanzi_value_site_pv');
+            if (!targetNode) return;
+
+            // 创建观察器，当不蒜子把数字填入 span 时触发打印
+            const observer = new MutationObserver((mutationsList) => {
+                for (const mutation of mutationsList) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        const val = targetNode.innerText.trim();
+                        if (val) {
+                            console.log("%c 📊 访问统计 ", "background:#1e3a8a;color:#fff;padding:3px;border-radius:3px", "当前总访问量：" + val);
+                            observer.disconnect(); // 打印一次后停止监听
+                        }
+                    }
+                }
+            });
+
+            // 开始监听
+            observer.observe(targetNode, { childList: true, characterData: true, subtree: true });
+
+            // 兜底：如果已经有值了（虽然概率低）
+            if (targetNode.innerText.trim()) {
+                console.log("%c 📊 访问统计 ", "background:#1e3a8a;color:#fff;padding:3px;border-radius:3px", "当前总访问量：" + targetNode.innerText.trim());
+                observer.disconnect();
+            }
+        })();
     </script>
+
 
 </body>
 </html>
