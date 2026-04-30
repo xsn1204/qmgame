@@ -323,6 +323,23 @@
 .nav-right::-webkit-scrollbar {
     display: none;
 }
+/* 新增：第二个便签的定位 */
+        .sticky-note-2 {
+            position: fixed;
+            top: 230px; /* 放在第一个便签下方 */
+            right: 40px;
+            width: 250px;
+            min-height: 100px;
+            background: #e1f5fe; /* 换个颜色区分，淡蓝色 */
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: #333;
+            font-size: 13px;
+            z-index: 50;
+            border-left: 5px solid #039be5; /* 蓝色侧边 */
+                line-height: 1.8; /* 行距加大 */
+        }
     </style>
 </head>
 
@@ -399,6 +416,16 @@
         </ul>
     </div>
 
+    <div class="sticky-note-2">
+        <h4>💡 备忘</h4>
+       <p>信息获取仅依赖内部Spotlight搜索，无需使用外部搜索。</p>
+        <p>8/12/15/16/18/29/30/extra页面不包含关键词，不影响线索推进。</p>
+        <p>若点击无响应，则表示该信息无关，无需使用F12或查看源码以获取线索。</p>
+         <p><strong>✍️ 此作品为404系列的第一作，游戏设计略显稚嫩，线索铺陈较为零散，情节丰富度和转折性有待提升。</strong></p>
+            <p><strong>若玩家在体验中认为节奏偏平or无法对上天线，请转战2.0，两者为相互独立作品。</strong></p>
+              <p><strong>1.0沾染过重班味，若体验不适请轻喷，感谢大家包容！</strong></p>
+        <p style="font-size:10px; color:#666;">AAA地下党 2026/4</p>
+    </div>
 
     <div class="mac-dock">
         <a href="note.html" target="_blank" class="dock-link">
